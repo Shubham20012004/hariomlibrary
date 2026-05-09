@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
+      xintegrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKx3nB+azPRl0sPUZZtP/eQ=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+    <link rel="shortcut icon" href="assests/logo.png" type="image/x-icon">
+    <title>Forgot Password | Caged Coder</title>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap');
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: 'Montserrat', sans-serif;
+      }
+
+      body {
+        background-color: #c9d6ff;
+        background: linear-gradient(to right, #e2e2e2, #c9d6ff);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        height: 100vh;
+      }
+
+      .container {
+        background-color: #fff;
+        border-radius: 30px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.35);
+        position: relative;
+        overflow: hidden;
+        width: 400px; /* Adjusted width for a single form container */
+        max-width: 100%;
+        min-height: 380px; /* Adjusted height for a single form */
+        display: flex; /* To center the form inside the container */
+        align-items: center;
+        justify-content: center;
+      }
+
+      .container p {
+        font-size: 14px;
+        line-height: 20px;
+        letter-spacing: 0.3px;
+        margin: 20px 0;
+      }
+
+      .container span {
+        font-size: 12px;
+      }
+
+      .container a {
+        color: #333;
+        font-size: 13px;
+        text-decoration: none;
+        margin: 15px 0 10px;
+      }
+
+      .container button {
+        background-color: #2da0a8;
+        color: #fff;
+        font-size: 12px;
+        padding: 10px 45px;
+        border: 1px solid transparent;
+        border-radius: 8px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        margin-top: 10px;
+        cursor: pointer;
+      }
+
+      .container button.hidden {
+        background-color: transparent;
+        border-color: #fff;
+      }
+
+      .container form {
+        background-color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        padding: 0 40px;
+        height: 100%;
+        width: 100%; /* Make form fill its container */
+      }
+
+      .container input {
+        background-color: #eee;
+        border: none;
+        margin: 8px 0;
+        padding: 10px 15px;
+        font-size: 13px;
+        border-radius: 8px;
+        width: 100%;
+        outline: none;
+      }
+
+      .form-container {
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+      }
+
+      /* Styles for messages */
+      .message {
+        margin-top: 10px;
+        padding: 8px 15px;
+        border-radius: 5px;
+        font-size: 13px;
+        color: white;
+        text-align: center;
+        display: none; /* Hidden by default */
+        width: 100%;
+      }
+
+      .message.success {
+        background-color: #4caf50; /* Green for success */
+      }
+
+      .message.error {
+        background-color: #f44336; /* Red for error */
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container" id="forgotPasswordContainer">
+      <div class="form-container">
+        <form id="forgotPasswordForm" aria-label="Forgot password form">
+          <h1>Forgot Your Password?</h1>
+          <p>
+            Enter your email address below and we'll send you a link to reset
+            your password.
+          </p>
+          <input
+            type="email"
+            placeholder="Email"
+            autocomplete="email"
+            required
+            id="forgotEmail"
+          />
+          <button type="submit">Send Reset Link</button>
+          <div id="forgotPasswordMessage" class="message"></div>
+          <a href="index.html" style="margin-top: 20px;">Back to Login</a>
+        </form>
+      </div>
+    </div>
+
+    <script>
+      const forgotPasswordForm = document.getElementById('forgotPasswordForm');
+      const forgotEmail = document.getElementById('forgotEmail');
+      const forgotPasswordMessage = document.getElementById(
+        'forgotPasswordMessage'
+      );
+
+      const BASE_URL = 'http://localhost:5000/api/auth'; // Your backend base URL
+
+      // --- Helper function to display messages ---
+      function displayMessage(element, message, type) {
+        element.textContent = message;
+        element.className = `message ${type}`; // Add 'success' or 'error' class
+        element.style.display = 'block'; // Make sure it's visible
+      }
+
+      function clearMessage(element) {
+        element.textContent = '';
+        element.className = 'message'; // Reset classes
+        element.style.display = 'none'; // Hide it
+      }
+
+      // --- Handle Forgot Password Form Submission ---
+      forgotPasswordForm.addEventListener('submit', async (e) => {
+        e.preventDefault(); // Prevent default form submission
+
+        const email = forgotEmail.value;
+        clearMessage(forgotPasswordMessage); // Clear previous messages
+
+        try {
+          // IMPORTANT: The backend route is /forgotpassword (no dash)
+          const response = await fetch(`${BASE_URL}/forgotpassword`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ email }),
+          });
+
+          const data = await response.json();
+
+          if (response.ok) {
+            displayMessage(
+              forgotPasswordMessage,
+              data.message ||
+                'If an account with that email exists, a password reset link has been sent.',
+              'success'
+            );
+            forgotPasswordForm.reset(); // Clear the email field
+          } else {
+            // Backend might send a generic message even on error to prevent email enumeration
+            displayMessage(
+              forgotPasswordMessage,
+              data.message ||
+                'Could not process request. Please check your email or try again.',
+              'error'
+            );
+          }
+        } catch (error) {
+          console.error('Error during forgot password request:', error);
+          displayMessage(
+            forgotPasswordMessage,
+            'An unexpected error occurred. Please try again later.',
+            'error'
+          );
+        }
+      });
+    </script>
+  </body>
+</html>

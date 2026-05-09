@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+     <link rel="shortcut icon" href="assests/logo.png" type="image/x-icon">
+    <title>My Fees Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        /* Use the Inter font family */
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Add smooth transitions for a better user experience */
+        .transition-all {
+            transition: all 0.3s ease-in-out;
+        }
+        /* Simple scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #94a3b8;
+            border-radius: 10px;
+        }
+        .dark ::-webkit-scrollbar-track {
+            background: #1e293b;
+        }
+        .dark ::-webkit-scrollbar-thumb {
+            background: #475569;
+        }
+
+        /* Animations for toast */
+        @keyframes slide-in-bottom {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .toast.show {
+            animation: slide-in-bottom 0.4s ease-out forwards;
+        }
+
+        @keyframes slide-out-bottom {
+            from { opacity: 1; transform: translateY(0); }
+            to { opacity: 0; transform: translateY(20px); }
+        }
+        .toast.hide {
+            animation: slide-out-bottom 0.3s ease-in forwards;
+        }
+
+        /* Table specific styles for better dark mode readability */
+        .min-w-full th, .min-w-full td {
+            white-space: nowrap; /* Prevent text wrapping in table headers/cells */
+        }
+        .min-w-full tbody tr {
+            background-color: transparent; /* Ensure background is handled by hover/stripe if applied */
+        }
+        .min-w-full tbody tr:nth-child(odd) {
+            background-color: #f8fafc; /* Lighter background for odd rows in light mode */
+        }
+        .dark .min-w-full tbody tr:nth-child(odd) {
+            background-color: #1e293b; /* Darker background for odd rows in dark mode */
+        }
+    </style>
+    <script>
+        // Tailwind Dark Mode Configuration
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: { // Ensure these are defined for the table status colors
+                        indigo: { // Custom indigo to match the provided template
+                            50: '#eef2ff',
+                            100: '#e0e7ff',
+                            200: '#c7d2fe',
+                            300: '#a5b4fc',
+                            400: '#818cf8',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                            800: '#3730a3',
+                            900: '#312e81',
+                        },
+                        // Ensure these colors are available for fee statuses
+                        yellow: {
+                            600: '#d97706',
+                            400: '#facc15'
+                        },
+                        green: {
+                            600: '#16a34a',
+                            400: '#4ade80'
+                        },
+                        red: {
+                            600: '#dc2626',
+                            400: '#f87171'
+                        },
+                        blue: {
+                            600: '#2563eb',
+                            400: '#60a5fa'
+                        }
+                    }
+                },
+            },
+        };
+    </script>
+</head>
+<body class="bg-slate-100 dark:bg-slate-900 text-slate-800 dark:text-slate-200 transition-all">
+
+    <div class="flex h-screen">
+
+        <aside class="w-64 flex-shrink-0 bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 flex flex-col transition-all">
+            <div class="h-16 flex items-center justify-center border-b border-slate-200 dark:border-slate-700">
+                <h1 class="text-xl font-bold text-indigo-600 dark:text-indigo-400">📚 HARIOM Library</h1>
+            </div>
+            <nav class="flex-1 px-4 py-6 space-y-2">
+                <a href="dashboard.html" class="flex items-center px-4 py-2 text-sm font-medium rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-3"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                    Overview
+                </a>
+                <a href="attendance.html" class="flex items-center px-4 py-2 text-sm font-medium rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-3"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                    Attendance
+                </a>
+                <a href="plans.html" class="flex items-center px-4 py-2 text-sm font-medium rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-3"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>
+                    Plans
+                </a>
+                <a href="fees.html" class="flex items-center px-4 py-2 text-sm font-medium rounded-lg bg-indigo-50 dark:bg-slate-700 text-indigo-700 dark:text-white">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-3"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></svg>
+                    Fees
+                </a>
+                <a href="timer.html" class="flex items-center px-4 py-2 text-sm font-medium rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-3"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    Timer
+                </a>
+            </nav>
+            <div class="px-4 py-6 border-t border-slate-200 dark:border-slate-700">
+                <button id="logoutBtn" class="flex items-center justify-center px-4 py-2 text-sm font-medium rounded-lg hover:bg-red-100 dark:hover:bg-red-900/50 text-red-600 dark:text-red-400 w-full">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-3"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
+                    Sign Out
+                </button>
+            </div>
+        </aside>
+
+        <main class="flex-1 p-6 lg:p-8 overflow-y-auto">
+            <div class="flex justify-between items-center mb-8">
+                <div>
+                    <h2 class="text-3xl font-bold">My Fees</h2>
+                    <p class="text-slate-500 dark:text-slate-400">View your fee payment history and status.</p>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button id="theme-toggle" class="p-2 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700">
+                        <svg id="theme-toggle-dark-icon" class="w-6 h-6 hidden" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
+                        <svg id="theme-toggle-light-icon" class="w-6 h-6 hidden" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 5.05a1 1 0 010-1.414l.707-.707a1 1 0 011.414 1.414l-.707.707a1 1 0 01-1.414 0zM3 11a1 1 0 100-2H2a1 1 0 100 2h1z"></path></svg>
+                    </button>
+                    <span class="font-semibold text-slate-700 dark:text-slate-200" id="current-time"></span>
+                    <span class="text-slate-500" id="current-date"></span>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
+
+                <div class="bg-white dark:bg-slate-800 p-8 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-700 flex flex-col col-span-full lg:col-span-1">
+                    <h2 class="text-3xl font-bold mb-6 text-center text-slate-800 dark:text-slate-200">Your Fee Summary</h2>
+                    <div class="mb-4 text-center">
+                        <p class="text-lg text-slate-700 dark:text-slate-300">Welcome, <span class="font-semibold text-indigo-600 dark:text-indigo-400" id="studentDisplayName">Loading...</span>!</p>
+                    </div>
+
+                    <div class="border-t border-slate-200 dark:border-slate-700 pt-6 mt-6 flex justify-between items-center">
+                        <span class="text-xl font-bold text-slate-700 dark:text-slate-200">Total Fees Paid:</span>
+                        <span id="totalFeesAmount" class="text-3xl font-extrabold text-indigo-600 dark:text-indigo-400">₹0.00</span>
+                    </div>
+                </div>
+
+                <div class="bg-white dark:bg-slate-800 p-8 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-700 flex flex-col col-span-full lg:col-span-1">
+                    <h2 class="text-3xl font-bold mb-6 text-slate-800 dark:text-slate-200 text-center">Your Payment History</h2>
+
+                    <div class="flex items-center mb-6 space-x-3">
+                        <input type="text" id="feeSearchInput" placeholder="Search by description or status..." class="flex-grow p-3 rounded-lg border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        <button id="refreshFeesBtn" class="p-3 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-refresh-cw"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.5 9a8.5 8.5 0 0 1 14.3-6.6l-2.4 2.4"></path><path d="M20.5 15a8.5 8.5 0 0 1-14.3 6.6l2.4-2.4"></path></svg>
+                        </button>
+                    </div>
+
+                    <div id="feeRecordsList" class="flex-grow overflow-y-auto max-h-96">
+                        <p id="initialLoadingMessage" class="text-lg text-slate-500 dark:text-slate-400 text-center">
+                            Checking login status...
+                        </p>
+                        <p id="loadingMessage" class="text-lg text-slate-500 dark:text-slate-400 text-center hidden">
+                            Loading fee records...
+                        </p>
+                        <p id="noRecordsMessage" class="text-lg text-slate-500 dark:text-slate-400 text-center hidden">
+                            No payment records found.
+                        </p>
+                        <p id="noSearchResultsMessage" class="text-lg text-slate-500 dark:text-slate-400 text-center hidden">
+                            No records match your search.
+                        </p>
+                        <p id="errorMessage" class="text-lg text-red-500 dark:text-red-400 text-center hidden">
+                            An error occurred. Please try again later.
+                        </p>
+                        </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div id="toast" class="fixed bottom-5 right-5 bg-slate-900 dark:bg-white text-white dark:text-slate-900 py-3 px-5 rounded-lg shadow-xl text-sm font-semibold opacity-0 translate-y-10">
+        Toast Message
+    </div>
+
+<script>
+    let allFeeRecords = [];
+    let currentSearchTerm = '';
+
+    const DOM = {
+        feeRecordsList: document.getElementById('feeRecordsList'),
+        initialLoadingMessage: document.getElementById('initialLoadingMessage'),
+        noRecordsMessage: document.getElementById('noRecordsMessage'),
+        loadingMessage: document.getElementById('loadingMessage'),
+        errorMessage: document.getElementById('errorMessage'),
+        noSearchResultsMessage: document.getElementById('noSearchResultsMessage'),
+        totalFeesAmount: document.getElementById('totalFeesAmount'),
+        studentDisplayName: document.getElementById('studentDisplayName'),
+        feeSearchInput: document.getElementById('feeSearchInput'),
+        refreshFeesBtn: document.getElementById('refreshFeesBtn'),
+        toast: document.getElementById('toast'),
+        currentTimeDisplay: document.getElementById('current-time'),
+        currentDateDisplay: document.getElementById('current-date'),
+        themeToggleBtn: document.getElementById('theme-toggle'),
+        darkIcon: document.getElementById('theme-toggle-dark-icon'),
+        lightIcon: document.getElementById('theme-toggle-light-icon'),
+        logoutBtn: document.getElementById('logoutBtn'),
+    };
+
+    function showToast(message, type = 'success') {
+        const classMap = {
+            success: ['bg-slate-900', 'dark:bg-white', 'text-white', 'dark:text-slate-900'],
+            error: ['bg-red-600', 'dark:bg-red-500', 'text-white'],
+            info: ['bg-blue-600', 'dark:bg-blue-500', 'text-white']
+        };
+        DOM.toast.textContent = message;
+        DOM.toast.className = 'fixed bottom-5 right-5 py-3 px-5 rounded-lg shadow-xl text-sm font-semibold opacity-0';
+        DOM.toast.classList.add(...(classMap[type] || classMap.success), 'show');
+
+        setTimeout(() => {
+            DOM.toast.classList.remove('show');
+            DOM.toast.classList.add('hide');
+        }, 3000);
+        setTimeout(() => DOM.toast.classList.remove('hide'), 3300);
+    }
+
+    function hideAllMessages() {
+        ['initialLoadingMessage', 'loadingMessage', 'noRecordsMessage', 'errorMessage', 'noSearchResultsMessage']
+            .forEach(id => DOM[id].classList.add('hidden'));
+    }
+
+    function renderFeeRecords(records) {
+        DOM.feeRecordsList.innerHTML = '';
+        hideAllMessages();
+
+        if (!Array.isArray(records) || records.length === 0) {
+            (currentSearchTerm ? DOM.noSearchResultsMessage : DOM.noRecordsMessage).classList.remove('hidden');
+            DOM.totalFeesAmount.textContent = '₹0.00';
+            return;
+        }
+
+        let totalPaid = 0;
+        const sorted = records.slice().sort((a, b) => new Date(b.date) - new Date(a.date));
+
+        const tableRows = sorted.map(record => {
+            const amount = parseFloat(record.amount || 0).toFixed(2);
+            const date = new Date(record.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+            totalPaid += parseFloat(record.amount || 0);
+
+            return `
+                <tr class="border-b border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700">
+                    <td class="py-3 px-4 text-sm text-slate-700 dark:text-slate-300">Fee Payment - ${record.method || 'N/A'}</td>
+                    <td class="py-3 px-4 text-sm text-slate-700 dark:text-slate-300">₹${amount}</td>
+                    <td class="py-3 px-4 text-sm text-slate-700 dark:text-slate-300">${date}</td>
+                    <td class="py-3 px-4 text-sm text-green-600 dark:text-green-400 font-semibold">Paid</td>
+                    <td class="py-3 px-4 text-sm text-slate-700 dark:text-slate-300">${record.method || 'N/A'}</td>
+                    <td class="py-3 px-4 text-sm text-slate-700 dark:text-slate-300">${record.receiptId || 'N/A'}</td>
+                </tr>
+            `;
+        }).join('');
+
+        DOM.feeRecordsList.innerHTML = `
+            <div class="overflow-x-auto">
+                <table class="min-w-full bg-white dark:bg-slate-800 rounded-lg shadow-md overflow-hidden">
+                    <thead class="bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200">
+                        <tr>
+                            <th class="py-3 px-4 text-left text-sm font-semibold">Description</th>
+                            <th class="py-3 px-4 text-left text-sm font-semibold">Amount</th>
+                            <th class="py-3 px-4 text-left text-sm font-semibold">Payment Date</th>
+                            <th class="py-3 px-4 text-left text-sm font-semibold">Status</th>
+                            <th class="py-3 px-4 text-left text-sm font-semibold">Method</th>
+                            <th class="py-3 px-4 text-left text-sm font-semibold">Receipt ID</th>
+                        </tr>
+                    </thead>
+                    <tbody>${tableRows}</tbody>
+                </table>
+            </div>
+        `;
+
+        DOM.totalFeesAmount.textContent = `₹${totalPaid.toFixed(2)}`;
+    }
+
+    function getLoggedInUser() {
+        try {
+            const token = localStorage.getItem('token');
+            const user = JSON.parse(localStorage.getItem('user'));
+
+            if (!token || !user?.name || (!user._id && !user.id)) {
+                throw new Error("Invalid user info.");
+            }
+
+            return { token, user };
+        } catch (e) {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.href = 'login.html';
+            return null;
+        }
+    }
+
+    async function fetchFeeHistory() {
+        hideAllMessages();
+        DOM.loadingMessage.classList.remove('hidden');
+
+        const auth = getLoggedInUser();
+        if (!auth) return;
+
+        DOM.studentDisplayName.textContent = auth.user.name || 'Student';
+
+        try {
+            const res = await fetch('http://localhost:5000/api/student/fees/my', {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${auth.token}`
+                }
+            });
+
+            if (!res.ok) {
+                if (res.status === 401) {
+                    showToast('Session expired. Logging out...', 'error');
+                    localStorage.clear();
+                    setTimeout(() => window.location.href = 'login.html', 1500);
+                    return;
+                }
+
+                const errorData = await res.json();
+                throw new Error(errorData.message || 'Server error');
+            }
+
+            allFeeRecords = await res.json();
+            applySearchFilter();
+            showToast('Fee history loaded successfully!');
+        } catch (err) {
+            DOM.errorMessage.textContent = `Error: ${err.message}`;
+            DOM.errorMessage.classList.remove('hidden');
+            showToast(err.message, 'error');
+            renderFeeRecords([]);
+        } finally {
+            DOM.loadingMessage.classList.add('hidden');
+        }
+    }
+
+    function applySearchFilter() {
+        const term = currentSearchTerm.toLowerCase();
+        const filtered = allFeeRecords.filter(record =>
+            (record.method && record.method.toLowerCase().includes(term)) ||
+            (record.receiptId && record.receiptId.toLowerCase().includes(term)) ||
+            'fee payment'.includes(term)
+        );
+        renderFeeRecords(filtered);
+    }
+
+    function updateDateTime() {
+        const now = new Date();
+        DOM.currentTimeDisplay.textContent = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+        DOM.currentDateDisplay.textContent = now.toLocaleDateString('en-IN');
+    }
+
+    function initializeDarkMode() {
+        const darkMode = localStorage.getItem('color-theme') === 'dark' ||
+                         (!localStorage.getItem('color-theme') && window.matchMedia('(prefers-color-scheme: dark)').matches);
+
+        document.documentElement.classList.toggle('dark', darkMode);
+        DOM.lightIcon.classList.toggle('hidden', !darkMode);
+        DOM.darkIcon.classList.toggle('hidden', darkMode);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        initializeDarkMode();
+        updateDateTime();
+        setInterval(updateDateTime, 1000);
+
+        const auth = getLoggedInUser();
+        if (auth) {
+            DOM.studentDisplayName.textContent = auth.user.name;
+            fetchFeeHistory();
+        } else {
+            DOM.studentDisplayName.textContent = 'Guest';
+            DOM.noRecordsMessage.textContent = 'Please log in to view your fee history.';
+            DOM.noRecordsMessage.classList.remove('hidden');
+        }
+
+        DOM.logoutBtn?.addEventListener('click', () => {
+            localStorage.clear();
+            showToast('Signed out.', 'info');
+            setTimeout(() => window.location.href = 'login.html', 1000);
+        });
+
+        DOM.feeSearchInput?.addEventListener('input', e => {
+            currentSearchTerm = e.target.value.trim();
+            applySearchFilter();
+        });
+
+        DOM.refreshFeesBtn?.addEventListener('click', fetchFeeHistory);
+
+        showToast('Dashboard Ready!', 'info');
+    });
+
+    DOM.themeToggleBtn?.addEventListener('click', () => {
+        const isDark = document.documentElement.classList.toggle('dark');
+        localStorage.setItem('color-theme', isDark ? 'dark' : 'light');
+        DOM.lightIcon.classList.toggle('hidden', !isDark);
+        DOM.darkIcon.classList.toggle('hidden', isDark);
+    });
+</script>
+
+</body>
+</html>

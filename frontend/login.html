@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+     <link rel="shortcut icon" href="assests/logo.png" type="image/x-icon">
+    <title>Login & Register</title>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap');
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: 'Montserrat', sans-serif;
+      }
+
+      body {
+        background-color: #c9d6ff;
+        background: linear-gradient(to right, #e2e2e2, #c9d6ff);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        height: 100vh;
+      }
+
+      .container {
+        background-color: #fff;
+        border-radius: 30px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.35);
+        position: relative;
+        overflow: hidden;
+        width: 768px;
+        max-width: 100%;
+        min-height: 480px;
+        /* Removed glass effect properties */
+      }
+
+      .container p {
+        font-size: 14px;
+        line-height: 20px;
+        letter-spacing: 0.3px;
+        margin: 20px 0;
+      }
+
+      .container span {
+        font-size: 12px;
+      }
+
+      .container a {
+        color: #333;
+        font-size: 13px;
+        text-decoration: none;
+        margin: 15px 0 10px;
+      }
+
+      .container button {
+        background-color: #2da0a8;
+        color: #fff;
+        font-size: 12px;
+        padding: 10px 45px;
+        border: 1px solid transparent;
+        border-radius: 8px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        margin-top: 10px;
+        cursor: pointer;
+      }
+
+      .container button.hidden {
+        background-color: transparent;
+        border-color: #fff;
+      }
+
+      .container form {
+        background-color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        padding: 0 40px;
+        height: 100%;
+      }
+
+      .container input {
+        background-color: #eee;
+        border: none;
+        margin: 8px 0;
+        padding: 10px 15px;
+        font-size: 13px;
+        border-radius: 8px;
+        width: 100%;
+        outline: none;
+      }
+
+      .form-container {
+        position: absolute;
+        top: 0;
+        height: 100%;
+        transition: all 0.6s ease-in-out;
+      }
+
+      .sign-in {
+        left: 0;
+        width: 50%;
+        z-index: 2;
+      }
+
+      .container.active .sign-in {
+        transform: translateX(100%);
+      }
+
+      .sign-up {
+        left: 0;
+        width: 50%;
+        opacity: 0;
+        z-index: 1;
+      }
+
+      .container.active .sign-up {
+        transform: translateX(100%);
+        opacity: 1;
+        z-index: 5;
+        animation: move 0.6s;
+      }
+
+      @keyframes move {
+        0%,
+        49.99% {
+          opacity: 0;
+          z-index: 1;
+        }
+        50%,
+        100% {
+          opacity: 1;
+          z-index: 5;
+        }
+      }
+
+      .social-icons {
+        margin: 20px 0;
+        display: flex; /* Ensure flex for icon + text or just centered icon */
+        justify-content: center;
+        align-items: center;
+        width: 100%; /* Make it fill width for centering google button */
+      }
+
+      .social-icons a.icon { /* Old social icon style */
+        border: 1px solid #ccc;
+        border-radius: 20%;
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+        margin: 0 3px;
+        width: 40px;
+        height: 40px;
+      }
+
+      .toggle-container {
+        position: absolute;
+        top: 0;
+        left: 50%;
+        width: 50%;
+        height: 100%;
+        overflow: hidden;
+        transition: all 0.6s ease-in-out;
+        border-radius: 150px 0 0 100px;
+        z-index: 1000;
+      }
+
+      .container.active .toggle-container {
+        transform: translateX(-100%);
+        border-radius: 0 150px 100px 0;
+      }
+
+      .toggle {
+        background-color: #2da0a8;
+        height: 100%;
+        background: linear-gradient(to right, #5c6bc0, #2da0a8);
+        color: #fff;
+        position: relative;
+        left: -100%;
+        height: 100%;
+        width: 200%;
+        transform: translateX(0);
+        transition: all 0.6s ease-in-out;
+      }
+
+      .container.active .toggle {
+        transform: translateX(50%);
+      }
+
+      .toggle-panel {
+        position: absolute;
+        width: 50%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        padding: 0 30px;
+        text-align: center;
+        top: 0;
+        transform: translateX(0);
+        transition: all 0.6s ease-in-out;
+      }
+
+      .toggle-left {
+        transform: translateX(-200%);
+      }
+
+      .container.active .toggle-left {
+        transform: translateX(0);
+      }
+
+      .toggle-right {
+        right: 0;
+        transform: translateX(0);
+      }
+
+      .container.active .toggle-right {
+        transform: translateX(200%);
+      }
+
+      /* Styles for messages */
+      .message {
+        margin-top: 10px;
+        padding: 8px 15px;
+        border-radius: 5px;
+        font-size: 13px;
+        color: white;
+        text-align: center;
+        display: none; /* Hidden by default */
+        width: 100%; /* Ensure it spans the width of the form */
+      }
+
+      .message.success {
+        background-color: #4caf50; /* Green for success */
+      }
+
+      .message.error {
+        background-color: #f44336; /* Red for error */
+      }
+      .message.info { /* For info messages like redirects */
+        background-color: #2196F3;
+      }
+
+      .admin-hint {
+        font-size: 0.9em;
+        margin-top: 15px;
+        color: #eee; /* Light color to blend with background */
+      }
+      .admin-login-text {
+        font-size: 12px;
+        color: #555;
+        margin-top: 10px;
+      }
+
+      /* Google button styling for functional button */
+      .google-button {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background-color: #4285F4; /* Google Blue */
+          color: white;
+          padding: 10px 20px;
+          border-radius: 8px;
+          font-weight: 600;
+          font-size: 14px;
+          cursor: pointer;
+          transition: background-color 0.3s ease;
+          text-decoration: none; /* Remove underline from anchor tag */
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+          width: 100%; /* Make it fill the width of its container */
+          max-width: 250px; /* Optional: cap max width for aesthetics */
+          box-sizing: border-box; /* Include padding and border in the element's total width and height */
+      }
+      .google-button:hover {
+          background-color: #357ae8; /* Darker blue on hover */
+      }
+      .google-button svg {
+          margin-right: 10px;
+      }
+      .google-button .spinner {
+          border: 2px solid rgba(255, 255, 255, 0.5);
+          border-top: 2px solid #fff;
+          border-radius: 50%;
+          width: 16px;
+          height: 16px;
+          animation: spin 1s linear infinite;
+          margin-left: 10px;
+          display: none; /* Hidden by default */
+      }
+      @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container" id="container">
+      <div class="form-container sign-up">
+        <form id="signUpForm" aria-label="Sign up form">
+          <h1>Create Account</h1>
+          <div class="social-icons">
+            <a href="#" class="google-button" aria-label="Sign up with Google" id="googleSignUpBtn">
+              <!-- Google "G" logo SVG -->
+              <svg viewBox="0 0 48 48" style="width: 20px; height: 20px;">
+                <path fill="#EA4335" d="M24 9.5c3.31 0 5.99 1.44 7.98 3.32l5.05-5.05C34.78 3.96 29.74 2 24 2 13.43 2 4.67 8.01 2.37 16H8.5V20H2.37c-.12.65-.2 1.32-.2 2v4c0 .68.08 1.35.2 2H8.5v4H2.37C4.67 39.99 13.43 46 24 46c5.74 0 10.78-1.96 14.41-5.27l-5.05-5.05c-1.99 1.88-4.67 3.32-7.98 3.32-8.52 0-15.34-6.57-16.17-15H24v-4H7.83c.83-8.43 7.65-15 16.17-15z"/>
+                <path fill="#4285F4" d="M43.68 22.8c0-1.8-.16-3.5-.47-5.1H24v8.1h10.7c-.5 2.9-2.1 5.4-4.8 7.1l6.4 5c3.8-3.5 6-8.7 6-14.1z"/>
+                <path fill="#FBBC04" d="M24 46c6.2 0 11.5-2.07 15.3-5.67l-6.4-5c-1.8 1.4-4.2 2.3-7.9 2.3-6.1 0-11.2-4.1-13.1-9.7H3.4c2.8 5.6 9.6 9.7 20.6 9.7z"/>
+                <path fill="#34A853" d="M24 2c6.9 0 12.8 2.6 17.5 7.1L36 14c-1.8-1.4-4.2-2.3-7.9-2.3-6.1 0-11.2 4.1-13.1 9.7H3.4c2.8-5.6 9.6-9.7 20.6-9.7z"/>
+                <path fill="none" d="M0 0h48v48H0z"/>
+              </svg>
+              Sign up with Google
+              <div class="spinner" id="signUpSpinner"></div>
+            </a>
+          </div>
+          <p class="social-signup-text">or use your email for registration</p>
+          <input
+            type="text"
+            placeholder="Name"
+            autocomplete="name"
+            required
+            id="signUpName"
+          />
+          <input
+            type="email"
+            placeholder="Email"
+            autocomplete="email"
+            required
+            id="signUpEmail"
+          />
+          <input
+            type="password"
+            placeholder="Password"
+            autocomplete="new-password"
+            required
+            id="signUpPassword"
+          />
+          <button type="submit">Sign Up</button>
+          <div id="signUpMessage" class="message"></div>
+        </form>
+      </div>
+
+      <div class="form-container sign-in">
+        <form id="signInForm" aria-label="Sign in form">
+          <h1>Sign In</h1>
+          <div class="social-icons">
+            <a href="oauth-redirect-handler.html" class="google-button" aria-label="Sign in with Google" id="googleSignInBtn">
+              <!-- Google "G" logo SVG -->
+              <svg viewBox="0 0 48 48" style="width: 20px; height: 20px;">
+                <path fill="#EA4335" d="M24 9.5c3.31 0 5.99 1.44 7.98 3.32l5.05-5.05C34.78 3.96 29.74 2 24 2 13.43 2 4.67 8.01 2.37 16H8.5V20H2.37c-.12.65-.2 1.32-.2 2v4c0 .68.08 1.35.2 2H8.5v4H2.37C4.67 39.99 13.43 46 24 46c5.74 0 10.78-1.96 14.41-5.27l-5.05-5.05c-1.99 1.88-4.67 3.32-7.98 3.32-8.52 0-15.34-6.57-16.17-15H24v-4H7.83c.83-8.43 7.65-15 16.17-15z"/>
+                <path fill="#4285F4" d="M43.68 22.8c0-1.8-.16-3.5-.47-5.1H24v8.1h10.7c-.5 2.9-2.1 5.4-4.8 7.1l6.4 5c3.8-3.5 6-8.7 6-14.1z"/>
+                <path fill="#FBBC04" d="M24 46c6.2 0 11.5-2.07 15.3-5.67l-6.4-5c-1.8 1.4-4.2 2.3-7.9 2.3-6.1 0-11.2-4.1-13.1-9.7H3.4c2.8 5.6 9.6 9.7 20.6 9.7z"/>
+                <path fill="#34A853" d="M24 2c6.9 0 12.8 2.6 17.5 7.1L36 14c-1.8-1.4-4.2-2.3-7.9-2.3-6.1 0-11.2 4.1-13.1 9.7H3.4c2.8-5.6 9.6-9.7 20.6-9.7z"/>
+                <path fill="none" d="M0 0h48v48H0z"/>
+              </svg>
+              Sign in with Google
+              <div class="spinner" id="signInSpinner"></div>
+            </a>
+          </div>
+          <p class="email-signin-text">or use your email password</p>
+          <input
+            type="email"
+            placeholder="Email"
+            autocomplete="email"
+            required
+            id="signInEmail"
+          />
+          <input
+            type="password"
+            placeholder="Password"
+            autocomplete="current-password"
+            required
+            id="signInPassword"
+          />
+          <a href="forgot.html">Forgot Your Password?</a>
+          <button type="submit">Sign In</button>
+          <div id="signInMessage" class="message"></div>
+        </form>
+      </div>
+
+      <div class="toggle-container">
+        <div class="toggle">
+          <div class="toggle-panel toggle-left">
+            <h1>Welcome Back!</h1>
+            <p>Already have an account? Sign in to your account.</p>
+            <button class="hidden" id="login">Sign In</button>
+          </div>
+          <div class="toggle-panel toggle-right">
+            <h1>Hello, Friend!</h1>
+            <p>New here? Click here to create an account to get started!</p>
+            <button class="hidden" id="register">Sign Up</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const container = document.getElementById('container');
+      const registerBtn = document.getElementById('register');
+      const loginBtn = document.getElementById('login');
+
+      // Form elements
+      const signUpForm = document.getElementById('signUpForm');
+      const signInForm = document.getElementById('signInForm');
+
+      const signUpName = document.getElementById('signUpName');
+      const signUpEmail = document.getElementById('signUpEmail');
+      const signUpPassword = document.getElementById('signUpPassword');
+
+      const signInEmail = document.getElementById('signInEmail');
+      const signInPassword = document.getElementById('signInPassword');
+
+      // Message display elements
+      const signUpMessage = document.getElementById('signUpMessage');
+      const signInMessage = document.getElementById('signInMessage');
+
+      // Google OAuth buttons and spinners
+      const googleSignUpBtn = document.getElementById('googleSignUpBtn');
+      const googleSignInBtn = document.getElementById('googleSignInBtn');
+      const signUpSpinner = document.getElementById('signUpSpinner');
+      const signInSpinner = document.getElementById('signInSpinner');
+
+
+      const BASE_URL = 'http://localhost:5000/api/auth'; // Your backend base URL
+
+      // --- Helper function to display messages ---
+      function displayMessage(element, message, type) {
+        element.textContent = message;
+        element.className = `message ${type}`; // Add 'success' or 'error' class
+        element.style.display = 'block'; // Make sure it's visible
+      }
+
+      function clearMessage(element) {
+        element.textContent = '';
+        element.className = 'message'; // Reset classes
+        element.style.display = 'none'; // Hide it
+      }
+
+      // --- Toggle between Sign In and Sign Up forms ---
+      registerBtn.addEventListener('click', () => {
+        container.classList.add('active');
+        clearMessage(signUpMessage); // Clear messages on toggle
+        clearMessage(signInMessage);
+      });
+
+      loginBtn.addEventListener('click', () => {
+        container.classList.remove('active');
+        clearMessage(signUpMessage); // Clear messages on toggle
+        clearMessage(signInMessage);
+      });
+
+      // --- Handle Sign Up Form Submission ---
+      signUpForm.addEventListener('submit', async (e) => {
+        e.preventDefault(); // Prevent default form submission
+
+        const name = signUpName.value;
+        const email = signUpEmail.value;
+        const password = signUpPassword.value;
+
+        clearMessage(signUpMessage); // Clear previous messages
+
+        try {
+          const response = await fetch(`${BASE_URL}/register`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ name, email, password }),
+          });
+
+          const data = await response.json();
+
+          if (response.ok) {
+            displayMessage(
+              signUpMessage,
+              data.message || 'Registration successful! You can now sign in.',
+              'success'
+            );
+            // Optionally clear form fields or redirect
+            signUpForm.reset();
+            // Automatically switch to login form after successful registration
+            container.classList.remove('active');
+            displayMessage(signInMessage, 'Please sign in with your new account.', 'success');
+          } else {
+            displayMessage(
+              signUpMessage,
+              data.message || 'Registration failed. Please try again.',
+              'error'
+            );
+          }
+        } catch (error) {
+          console.error('Error during registration:', error);
+          displayMessage(
+            signUpMessage,
+            'An unexpected error occurred. Please try again later.',
+            'error'
+          );
+        }
+      });
+
+      // --- Handle Sign In Form Submission ---
+      signInForm.addEventListener('submit', async (e) => {
+        e.preventDefault(); // Prevent default form submission
+
+        const email = signInEmail.value;
+        const password = signInPassword.value;
+
+        clearMessage(signInMessage); // Clear previous messages
+
+        try {
+          const response = await fetch(`${BASE_URL}/login`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ email, password }),
+          });
+
+          const data = await response.json();
+
+          if (response.ok) {
+            displayMessage(signInMessage, data.message || 'Login successful!', 'success');
+            // Store the token (e.g., in localStorage)
+            if (data.token) {
+              localStorage.setItem('token', data.token);
+            }
+            // Optionally store user role and user name
+            if (data.user) {
+                localStorage.setItem('user', JSON.stringify(data.user)); // Store full user object
+                localStorage.setItem('userRole', data.user.role);
+            }
+
+
+            // Redirect based on role
+            if (data.user && data.user.role === 'admin') {
+                window.location.href = 'admin-dashboard.html'; // Redirect admin to admin dashboard
+            } else {
+                window.location.href = 'dashboard.html'; // Redirect regular user to user dashboard
+            }
+          } else {
+            displayMessage(
+              signInMessage,
+              data.message || 'Login failed. Invalid email or password.',
+              'error'
+            );
+          }
+        } catch (error) {
+          console.error('Error during login:', error);
+          displayMessage(
+            signInMessage,
+            'An unexpected error occurred. Please try again later.',
+            'error'
+          );
+        }
+      });
+
+      // --- Handle Google OAuth ---
+      function handleGoogleOAuth(e, spinnerElement, messageElement) {
+        e.preventDefault();
+        spinnerElement.style.display = 'block'; // Show spinner
+        
+        // Redirect to your backend's Google OAuth initiation endpoint
+        // Your backend (configured with Passport) will then handle the full OAuth flow.
+        window.location.href = `${BASE_URL}/google`;
+
+        console.log("Initiating Google OAuth process...");
+        displayMessage(messageElement, 'Redirecting to Google for authentication...', 'info');
+      }
+
+      // Attach event listeners to Google social icons, passing the correct spinner and message elements
+      googleSignUpBtn.addEventListener('click', (e) => handleGoogleOAuth(e, signUpSpinner, signUpMessage));
+      googleSignInBtn.addEventListener('click', (e) => handleGoogleOAuth(e, signInSpinner, signInMessage));
+    </script>
+  </body>
+</html>

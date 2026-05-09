@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+     <link rel="shortcut icon" href="assests/logo.png" type="image/x-icon">
+    <title>Fees Management | Admin Dashboard</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
+        xintegrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKx3nB+azPRl0sPUZZtP/eQ=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .transition-all { transition: all 0.3s ease-in-out; }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 10px; }
+        .dark ::-webkit-scrollbar-track { background: #1e293b; }
+        .dark ::-webkit-scrollbar-thumb { background: #475569; }
+        @keyframes fade-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-in { animation: fade-in 0.4s ease forwards; }
+        @keyframes fade-out { from { opacity: 1; transform: scale(1); } to { opacity: 0; transform: scale(0.9); } }
+        .animate-fade-out { animation: fade-out 0.3s ease forwards; }
+    </style>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'], },
+                    colors: { indigo: { 50: '#eef2ff', 100: '#e0e7ff', 200: '#c7d2fe', 300: '#a5b4fc', 400: '#818cf8', 500: '#6366f1', 600: '#4f46e5', 700: '#4338ca', 800: '#3730a3', 900: '#312e81', } }
+                }
+            }
+        };
+    </script>
+</head>
+
+<body class="bg-slate-100 dark:bg-slate-900 text-slate-800 dark:text-slate-200 transition-all flex h-screen">
+
+    <!-- Sidebar -->
+    <aside class="w-64 flex-shrink-0 bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 flex flex-col transition-all">
+        <div class="h-16 flex items-center justify-center border-b border-slate-200 dark:border-slate-700">
+            <h1 class="text-xl font-bold text-indigo-600 dark:text-indigo-400">📚 Admin Panel</h1>
+        </div>
+        <nav class="flex-1 px-4 py-6 space-y-2">
+            <a href="admin-dashboard.html" data-section="overview" class="nav-link flex items-center px-4 py-2 text-sm font-medium rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700">
+                <i class="fas fa-tachometer-alt w-5 h-5 mr-3"></i> Overview
+            </a>
+            <a href="user-management.html" data-section="users" class="nav-link flex items-center px-4 py-2 text-sm font-medium rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700">
+                <i class="fas fa-users w-5 h-5 mr-3"></i> User Management
+            </a>
+            <a href="fees-management.html" data-section="fees" class="nav-link flex items-center px-4 py-2 text-sm font-medium rounded-lg bg-indigo-50 dark:bg-slate-700 text-indigo-700 dark:text-white">
+                <i class="fas fa-hand-holding-usd w-5 h-5 mr-3"></i> Fees Management
+            </a>
+            <a href="complaint-management.html" data-section="complaints" class="nav-link flex items-center px-4 py-2 text-sm font-medium rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700">
+                <i class="fas fa-exclamation-triangle w-5 h-5 mr-3"></i> Complaints
+            </a>
+            <a href="announcements-management.html" data-section="announcements" class="nav-link flex items-center px-4 py-2 text-sm font-medium rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700">
+                <i class="fas fa-bullhorn w-5 h-5 mr-3"></i> Announcements
+            </a>
+        </nav>
+        <div class="px-4 py-6 border-t border-slate-200 dark:border-slate-700">
+            <button id="logoutBtn" class="flex items-center justify-center w-full px-4 py-2 text-sm font-medium rounded-lg hover:bg-red-100 dark:hover:bg-red-900/50 text-red-600 dark:text-red-400">
+                <i class="fas fa-sign-out-alt w-5 h-5 mr-3"></i> Sign Out
+            </button>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 p-6 lg:p-8 overflow-y-auto">
+        <div class="flex justify-between items-center mb-8">
+            <div>
+                <h2 class="text-3xl font-bold">Fees Management</h2>
+                <p class="text-slate-500 dark:text-slate-400">Update user fees status (paid/unpaid) and amount.</p>
+            </div>
+            <div>
+                <button id="theme-toggle" class="p-2 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700">
+                    <svg id="theme-toggle-dark-icon" class="w-6 h-6 hidden" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
+                    </svg>
+                    <svg id="theme-toggle-light-icon" class="w-6 h-6 hidden" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 5.05a1 1 0 010-1.414l.707-.707a1 1 0 011.414 1.414l-.707.707a1 1 0 01-1.414 0zM3 11a1 1 0 100-2H2a1 1 0 100 2h1z"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 gap-6 lg:gap-8">
+            <!-- Fees Management Section -->
+            <section id="fees" class="dashboard-section bg-white dark:bg-slate-800 p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow active">
+                <h3 class="text-xl font-semibold mb-4 text-slate-800 dark:text-slate-200">User Fees List</h3>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full bg-white dark:bg-slate-800 rounded-lg shadow-sm">
+                        <thead>
+                            <tr class="bg-slate-100 dark:bg-slate-700">
+                                <th class="py-3 px-4 text-left text-sm font-medium text-slate-600 dark:text-slate-300">Name</th>
+                                <th class="py-3 px-4 text-left text-sm font-medium text-slate-600 dark:text-slate-300">Email</th>
+                                <th class="py-3 px-4 text-left text-sm font-medium text-slate-600 dark:text-slate-300">Fees Status</th>
+                                <th class="py-3 px-4 text-left text-sm font-medium text-slate-600 dark:text-slate-300">Fees Amount</th>
+                                <th class="py-3 px-4 text-left text-sm font-medium text-slate-600 dark:text-slate-300">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="feesTableBody">
+                            <tr><td colspan="5" class="text-center py-4 text-slate-500 dark:text-slate-400">Loading fee data...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p id="feesMessage" class="mt-4 text-sm text-center text-slate-500 dark:text-slate-400 hidden"></p>
+            </section>
+        </div>
+    </main>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-5 right-5 bg-slate-900 dark:bg-white text-white dark:text-slate-900 py-3 px-5 rounded-lg shadow-xl text-sm font-semibold opacity-0 translate-y-10 transition-all duration-300">
+        Toast Message
+    </div>
+
+    <!-- Custom Confirmation Modal -->
+    <div id="confirmModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+        <div class="bg-white dark:bg-slate-800 p-6 rounded-lg shadow-xl text-center">
+            <p id="confirmMessage" class="mb-4 text-lg font-semibold text-slate-800 dark:text-slate-200"></p>
+            <div class="flex justify-center space-x-4">
+                <button id="confirmYesBtn" class="bg-red-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-red-700 transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 dark:focus:ring-offset-slate-800">Yes</button>
+                <button id="confirmNoBtn" class="bg-slate-300 text-slate-800 font-semibold py-2 px-4 rounded-lg hover:bg-slate-400 dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600 transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-500 dark:focus:ring-offset-slate-800">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Fee Update Modal -->
+    <div id="feeUpdateModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+        <div class="bg-white dark:bg-slate-800 p-6 rounded-lg shadow-xl w-full max-w-md">
+            <h3 class="text-xl font-semibold mb-4 text-slate-800 dark:text-slate-200">Update Fee for <span id="updateFeeUserName"></span></h3>
+            <div class="space-y-4">
+                <div>
+                    <label for="feeAmountInput" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Amount (₹)</label>
+                    <input type="number" id="feeAmountInput" step="0.01" min="0" placeholder="0.00"
+                        class="w-full px-3 py-2 bg-slate-100 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-800 dark:text-slate-200">
+                </div>
+                <div>
+                    <label for="paymentMethodSelect" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Payment Method</label>
+                    <select id="paymentMethodSelect"
+                        class="w-full px-3 py-2 bg-slate-100 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-800 dark:text-slate-200">
+                        <option value="Cash">Cash</option>
+                        <option value="Online">Online</option>
+                        <option value="UPI">UPI</option>
+                        <option value="Card">Card</option>
+                        <option value="Bank Transfer">Bank Transfer</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div class="flex justify-end space-x-3">
+                    <button id="cancelFeeUpdateBtn" class="bg-slate-300 text-slate-800 font-semibold py-2 px-4 rounded-lg hover:bg-slate-400 dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600 transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-500 dark:focus:ring-offset-slate-800">Cancel</button>
+                    <button id="markFeePaidBtn" class="bg-emerald-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-emerald-700 transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 dark:focus:ring-offset-slate-800">Mark Paid</button>
+                    <button id="markFeeUnpaidBtn" class="bg-red-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-red-700 transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 dark:focus:ring-offset-slate-800">Mark Unpaid</button>
+                </div>
+            </div>
+            <p id="feeUpdateMessage" class="mt-4 text-sm text-center"></p>
+        </div>
+    </div>
+
+
+    <!-- Link to the common JavaScript file -->
+    <script src="admin-common.js"></script>
+    <script>
+        // Specific script for the Fees Management page
+        document.addEventListener('DOMContentLoaded', async () => {
+            const feesTableBody = document.getElementById('feesTableBody');
+            const feesMessage = document.getElementById('feesMessage');
+
+            // Fee Update Modal elements
+            const feeUpdateModal = document.getElementById('feeUpdateModal');
+            const updateFeeUserName = document.getElementById('updateFeeUserName');
+            const feeAmountInput = document.getElementById('feeAmountInput');
+            const paymentMethodSelect = document.getElementById('paymentMethodSelect');
+            const markFeePaidBtn = document.getElementById('markFeePaidBtn');
+            const markFeeUnpaidBtn = document.getElementById('markFeeUnpaidBtn');
+            const cancelFeeUpdateBtn = document.getElementById('cancelFeeUpdateBtn');
+            const feeUpdateMessage = document.getElementById('feeUpdateMessage');
+
+            let currentUserIdForFeeUpdate = null; // To store the user ID for the current fee update operation
+
+            // --- Helper Functions (specific to this page) ---
+            function showFormMessage(element, msg, type) {
+                element.textContent = msg;
+                element.classList.remove('hidden', 'text-green-600', 'text-red-600', 'text-blue-600', 'dark:text-green-400', 'dark:text-red-400', 'dark:text-blue-400');
+                if (type === 'success') { element.classList.add('text-green-600', 'dark:text-green-400'); }
+                else if (type === 'error') { element.classList.add('text-red-600', 'dark:text-red-400'); }
+                else if (type === 'info') { element.classList.add('text-blue-600', 'dark:text-blue-400'); }
+                element.classList.remove('hidden');
+                setTimeout(() => { element.classList.add('hidden'); element.textContent = ''; }, 3000);
+            }
+
+            function clearFormMessage(element) { element.classList.add('hidden'); element.textContent = ''; }
+
+            // Function to open the fee update modal
+            function openFeeUpdateModal(user) {
+                currentUserIdForFeeUpdate = user._id;
+                updateFeeUserName.textContent = user.name;
+                feeAmountInput.value = user.fees?.amount !== undefined ? user.fees.amount.toFixed(2) : '0.00';
+                paymentMethodSelect.value = user.fees?.method || 'Cash'; // Pre-select current method or default
+                feeUpdateMessage.textContent = ''; // Clear previous messages
+                feeUpdateMessage.classList.add('hidden');
+                feeUpdateModal.classList.remove('hidden');
+            }
+
+            // Function to close the fee update modal
+            function closeFeeUpdateModal() {
+                feeUpdateModal.classList.add('hidden');
+                currentUserIdForFeeUpdate = null;
+            }
+
+            // --- Fetch Data Functions ---
+            async function fetchFees() {
+                feesTableBody.innerHTML = '<tr><td colspan="5" class="text-center py-4 text-slate-500 dark:text-slate-400">Loading fee data...</td></tr>';
+                clearFormMessage(feesMessage);
+
+                try {
+                    // makeApiRequest and showToast are from admin-common.js
+                    // Fetch users, as fee data is often embedded or linked per user
+                    const users = await makeApiRequest('/users');
+                    feesTableBody.innerHTML = '';
+
+                    if (users.length === 0) {
+                        showFormMessage(feesMessage, 'No users found with fee information.', 'info');
+                        return;
+                    }
+
+                    users.forEach(user => {
+                        const row = feesTableBody.insertRow();
+                        row.classList.add('border-b', 'border-slate-200', 'dark:border-slate-700', 'last:border-b-0');
+                        row.innerHTML = `
+                            <td class="py-3 px-4 text-sm">${user.name}</td>
+                            <td class="py-3 px-4 text-sm">${user.email}</td>
+                            <td class="py-3 px-4 text-sm">${user.fees?.status || 'N/A'}</td>
+                            <td class="py-3 px-4 text-sm">₹${user.fees?.amount !== undefined ? user.fees.amount.toFixed(2) : '0.00'}</td>
+                            <td class="py-3 px-4 text-sm space-x-2">
+                                <button data-id="${user._id}" class="update-fees-btn bg-indigo-500 text-white px-3 py-1 rounded-md text-xs font-semibold hover:bg-indigo-600 transition-colors">Update Fees</button>
+                            </td>
+                        `;
+                    });
+
+                    // Attach event listeners to the "Update Fees" buttons
+                    feesTableBody.querySelectorAll('.update-fees-btn').forEach(button => {
+                        button.addEventListener('click', (e) => {
+                            const userId = e.target.dataset.id;
+                            const userToUpdate = users.find(u => u._id === userId);
+                            if (userToUpdate) openFeeUpdateModal(userToUpdate);
+                        });
+                    });
+
+                } catch (error) {
+                    console.error('Error fetching fees data:', error);
+                    feesTableBody.innerHTML = '<tr><td colspan="5" class="text-center py-4 text-red-500 dark:text-red-400">Failed to load fees data.</td></tr>';
+                    showFormMessage(feesMessage, 'Failed to load fees data. ' + error.message, 'error');
+                }
+            }
+
+            // Function to handle the actual fee update API call
+            async function updateFeesAction(userId, status, amount, method) {
+                try {
+                    // makeApiRequest and showToast are from admin-common.js
+                    const data = await makeApiRequest(`/users/${userId}/fees`, 'PUT', { status, amount, method });
+                    showToast(data.message || 'Fees updated successfully!', 'success');
+                    closeFeeUpdateModal(); // Close modal on success
+                    fetchFees(); // Refresh the list
+                } catch (error) {
+                    console.error('Error updating fees:', error);
+                    showFormMessage(feeUpdateMessage, error.message, 'error'); // Show error in modal
+                    // Error handled by makeApiRequest also shows toast, but this is for in-modal feedback
+                }
+            }
+
+            // --- Event Listeners for the Fee Update Modal ---
+           markFeePaidBtn.addEventListener('click', () => {
+    const amount = parseFloat(feeAmountInput.value); // ✅ read user input
+    const method = paymentMethodSelect.value;
+
+    if (isNaN(amount) || amount < 0) {
+        showFormMessage(feeUpdateMessage, 'Please enter a valid non-negative amount.', 'error');
+        return;
+    }
+
+    if (currentUserIdForFeeUpdate) {
+        updateFeesAction(currentUserIdForFeeUpdate, 'paid', amount, method); // ✅ use the actual amount
+    }
+});
+
+            markFeeUnpaidBtn.addEventListener('click', () => {
+                let amount = parseFloat(feeAmountInput.value);
+                const method = paymentMethodSelect.value; // Still record method even if unpaid
+
+                if (isNaN(amount) || amount < 0) {
+                    showFormMessage(feeUpdateMessage, 'Please enter a valid non-negative amount.', 'error');
+                    return;
+                }
+                if (currentUserIdForFeeUpdate) {
+                    updateFeesAction(currentUserIdForFeeUpdate, 'unpaid', amount, method);
+                }
+            });
+
+            cancelFeeUpdateBtn.addEventListener('click', closeFeeUpdateModal);
+
+
+            // --- Initial Load ---
+            fetchFees();
+        });
+    </script>
+</body>
+</html>

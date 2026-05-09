@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Dashboard | College Library</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
+        xintegrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKx3nB+azPRl0sPUZZtP/eQ=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        /* Use the Inter font family as requested */
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* Add smooth transitions for a better user experience */
+        .transition-all {
+            transition: all 0.3s ease-in-out;
+        }
+
+        /* Simple scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #94a3b8;
+            border-radius: 10px;
+        }
+
+        .dark ::-webkit-scrollbar-track {
+            background: #1e293b;
+        }
+
+        .dark ::-webkit-scrollbar-thumb {
+            background: #475569;
+        }
+
+        /* Animations for toast and list items */
+        @keyframes fade-in {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-fade-in {
+            animation: fade-in 0.4s ease forwards;
+        }
+
+        @keyframes fade-out {
+            from {
+                opacity: 1;
+                transform: scale(1);
+            }
+            to {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+        }
+
+        .animate-fade-out {
+            animation: fade-out 0.3s ease forwards;
+        }
+    </style>
+    <script>
+        // Tailwind Dark Mode Configuration - Reusing student dashboard's Tailwind config
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        indigo: { // Custom indigo to match the provided template
+                            50: '#eef2ff',
+                            100: '#e0e7ff',
+                            200: '#c7d2fe',
+                            300: '#a5b4fc',
+                            400: '#818cf8',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                            800: '#3730a3',
+                            900: '#312e81',
+                        }
+                    }
+                }
+            }
+        };
+    </script>
+</head>
+
+<body class="bg-slate-100 dark:bg-slate-900 text-slate-800 dark:text-slate-200 transition-all flex h-screen">
+
+    <!-- Sidebar -->
+    <aside class="w-64 flex-shrink-0 bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 flex flex-col transition-all">
+        <div class="h-16 flex items-center justify-center border-b border-slate-200 dark:border-slate-700">
+            <h1 class="text-xl font-bold text-indigo-600 dark:text-indigo-400">📚 Admin Panel</h1>
+        </div>
+        <nav class="flex-1 px-4 py-6 space-y-2">
+            <a href="admin-dashboard.html" data-section="overview" class="nav-link flex items-center px-4 py-2 text-sm font-medium rounded-lg bg-indigo-50 dark:bg-slate-700 text-indigo-700 dark:text-white">
+                <i class="fas fa-tachometer-alt w-5 h-5 mr-3"></i>
+                Overview
+            </a>
+            <a href="user-management.html" data-section="users" class="nav-link flex items-center px-4 py-2 text-sm font-medium rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700">
+                <i class="fas fa-users w-5 h-5 mr-3"></i>
+                User Management
+            </a>
+            <a href="fees-management.html" data-section="fees" class="nav-link flex items-center px-4 py-2 text-sm font-medium rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700">
+                <i class="fas fa-hand-holding-usd w-5 h-5 mr-3"></i>
+                Fees Management
+            </a>
+            <a href="complaint-management.html" data-section="complaints" class="nav-link flex items-center px-4 py-2 text-sm font-medium rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700">
+                <i class="fas fa-exclamation-triangle w-5 h-5 mr-3"></i>
+                Complaints
+            </a>
+            <a href="announcements-management.html" data-section="announcements" class="nav-link flex items-center px-4 py-2 text-sm font-medium rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700">
+                <i class="fas fa-bullhorn w-5 h-5 mr-3"></i>
+                Announcements
+            </a>
+        </nav>
+        <div class="px-4 py-6 border-t border-slate-200 dark:border-slate-700">
+            <button id="logoutBtn" class="flex items-center justify-center w-full px-4 py-2 text-sm font-medium rounded-lg hover:bg-red-100 dark:hover:bg-red-900/50 text-red-600 dark:text-red-400">
+                <i class="fas fa-sign-out-alt w-5 h-5 mr-3"></i>
+                Sign Out
+            </button>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 p-6 lg:p-8 overflow-y-auto">
+        <div class="flex justify-between items-center mb-8">
+            <div>
+                <h2 class="text-3xl font-bold">Admin Dashboard</h2>
+                <p class="text-slate-500 dark:text-slate-400">Welcome back, <span id="adminNameDisplay">Admin</span>!</p>
+            </div>
+            <div>
+                <button id="theme-toggle" class="p-2 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700">
+                    <svg id="theme-toggle-dark-icon" class="w-6 h-6 hidden" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
+                    </svg>
+                    <svg id="theme-toggle-light-icon" class="w-6 h-6 hidden" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 5.05a1 1 0 010-1.414l.707-.707a1 1 0 011.414 1.414l-.707.707a1 1 0 01-1.414 0zM3 11a1 1 0 100-2H2a1 1 0 100 2h1z"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 gap-6 lg:gap-8">
+
+            <!-- Overview Section -->
+            <section id="overview" class="dashboard-section bg-white dark:bg-slate-800 p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow active">
+                <h3 class="text-xl font-semibold mb-4 text-slate-800 dark:text-slate-200">Dashboard Overview</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="bg-indigo-500 text-white p-4 rounded-lg shadow-sm text-center">
+                        <h4 class="text-lg font-medium">Total Users</h4>
+                        <p class="text-3xl font-bold" id="totalUsersCount">--</p>
+                    </div>
+                    <div class="bg-yellow-500 text-white p-4 rounded-lg shadow-sm text-center">
+                        <h4 class="text-lg font-medium">Pending Complaints</h4>
+                        <p class="text-3xl font-bold" id="pendingComplaintsCount">--</p>
+                    </div>
+                    <div class="bg-red-500 text-white p-4 rounded-lg shadow-sm text-center">
+                        <h4 class="text-lg font-medium">Unpaid Fees Users</h4>
+                        <p class="text-3xl font-bold" id="unpaidFeesCount">--</p>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-5 right-5 bg-slate-900 dark:bg-white text-white dark:text-slate-900 py-3 px-5 rounded-lg shadow-xl text-sm font-semibold opacity-0 translate-y-10 transition-all duration-300">
+        Toast Message
+    </div>
+
+    <!-- Custom Confirmation Modal -->
+    <div id="confirmModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+        <div class="bg-white dark:bg-slate-800 p-6 rounded-lg shadow-xl text-center">
+            <p id="confirmMessage" class="mb-4 text-lg font-semibold text-slate-800 dark:text-slate-200"></p>
+            <div class="flex justify-center space-x-4">
+                <button id="confirmYesBtn" class="bg-red-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-red-700 transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 dark:focus:ring-offset-slate-800">Yes</button>
+                <button id="confirmNoBtn" class="bg-slate-300 text-slate-800 font-semibold py-2 px-4 rounded-lg hover:bg-slate-400 dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600 transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-500 dark:focus:ring-offset-slate-800">Cancel</button>
+            </div>
+        </div>
+    </div>
+<script src="admin-common.js"></script>
+
+<script>
+    // --- Dashboard Overview Logic ---
+    const totalUsersCount = document.getElementById('totalUsersCount');
+    const pendingComplaintsCount = document.getElementById('pendingComplaintsCount');
+    const unpaidFeesCount = document.getElementById('unpaidFeesCount');
+
+    async function initializeDashboard() {
+        const adminInfo = getAdminInfo(); // Use global function
+        if (adminInfo) {
+            document.getElementById('adminNameDisplay').textContent = adminInfo.user.name;
+        }
+        fetchOverviewStats();
+    }
+
+    async function fetchOverviewStats() {
+        totalUsersCount.textContent = '--';
+        pendingComplaintsCount.textContent = '--';
+        unpaidFeesCount.textContent = '--';
+
+        try {
+            // Use global makeApiRequest
+            const data = await makeApiRequest('/summary');
+            totalUsersCount.textContent = data.totalUsers;
+            pendingComplaintsCount.textContent = data.pendingComplaints;
+            unpaidFeesCount.textContent = data.unpaidFeesUsers;
+        } catch (error) {
+            console.error('Error fetching overview stats:', error);
+            totalUsersCount.textContent = 'Error';
+            pendingComplaintsCount.textContent = 'Error';
+            unpaidFeesCount.textContent = 'Error';
+            // showToast is already handled by makeApiRequest for common API errors
+        }
+    }
+
+    // --- Fees Management Logic ---
+    const feesTableBody = document.getElementById('feesTableBody');
+    const feesMessage = document.getElementById('feesMessage');
+    const feeUpdateModal = document.getElementById('feeUpdateModal');
+    const updateFeeUserName = document.getElementById('updateFeeUserName');
+    const feeAmountInput = document.getElementById('feeAmountInput');
+    const paymentMethodSelect = document.getElementById('paymentMethodSelect');
+    const feeDueDateInput = document.getElementById('feeDueDateInput');
+    const feeNotesInput = document.getElementById('feeNotesInput');
+    const markFeePaidBtn = document.getElementById('markFeePaidBtn');
+    const markFeePartiallyPaidBtn = document.getElementById('markFeePartiallyPaidBtn');
+    const markFeeUnpaidBtn = document.getElementById('markFeeUnpaidBtn');
+    const cancelFeeUpdateBtn = document.getElementById('cancelFeeUpdateBtn');
+    const feeUpdateMessage = document.getElementById('feeUpdateMessage');
+
+    const filterStatusSelect = document.getElementById('filterStatus');
+    const filterPaymentMethodSelect = document.getElementById('filterPaymentMethod');
+    const searchUsersInput = document.getElementById('searchUsers');
+
+    let currentUserIdForFeeUpdate = null;
+    let allUsers = []; // Store all users to apply client-side filtering
+
+    function openFeeUpdateModal(user) {
+        currentUserIdForFeeUpdate = user._id;
+        updateFeeUserName.textContent = user.name;
+        // Ensure values are numbers for amount, default to 0 if undefined/null
+        feeAmountInput.value = user.fees?.amount !== undefined && user.fees.amount !== null ? user.fees.amount.toFixed(2) : '0.00';
+        paymentMethodSelect.value = user.fees?.method || '';
+        feeDueDateInput.value = user.fees?.dueDate || '';
+        feeNotesInput.value = user.fees?.notes || '';
+
+        clearFormMessage(feeUpdateMessage); // Use global helper
+        feeUpdateModal.classList.remove('hidden');
+    }
+
+    function closeFeeUpdateModal() {
+        feeUpdateModal.classList.add('hidden');
+        currentUserIdForFeeUpdate = null;
+    }
+
+    async function fetchFees() {
+        setLoadingState(feesTableBody, 'Loading fee data from API...', 7); // Use global helper
+        clearFormMessage(feesMessage); // Use global helper
+
+        try {
+            const users = await makeApiRequest('/users'); // Use global makeApiRequest
+            allUsers = users;
+            renderFeeRecords();
+        } catch (error) {
+            console.error('Error fetching fees data:', error);
+            feesTableBody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-red-500 dark:text-red-400">Failed to load fees data. ' + error.message + '</td></tr>';
+            showFormMessage(feesMessage, 'Failed to load fees data. ' + error.message, 'error'); // Use global helper
+        }
+    }
+
+    function renderFeeRecords() {
+        feesTableBody.innerHTML = '';
+        const statusFilter = filterStatusSelect.value;
+        const paymentMethodFilter = filterPaymentMethodSelect.value;
+        const searchQuery = searchUsersInput.value.toLowerCase().trim();
+        const today = new Date().toISOString().slice(0, 10);
+
+        const filteredUsers = allUsers.filter(user => {
+            const matchesStatus = statusFilter === 'All' || (user.fees?.status === statusFilter);
+            const matchesMethod = paymentMethodFilter === 'All' || (user.fees?.method === paymentMethodFilter);
+            const matchesSearch = searchQuery === '' ||
+                                  user.name.toLowerCase().includes(searchQuery) ||
+                                  user.email.toLowerCase().includes(searchQuery);
+            return matchesStatus && matchesMethod && matchesSearch;
+        });
+
+        if (filteredUsers.length === 0) {
+            feesTableBody.innerHTML = `<tr><td colspan="7" class="px-6 py-4 text-center text-slate-500 dark:text-slate-400">No users found matching your criteria.</td></tr>`;
+            return;
+        }
+
+        filteredUsers.forEach(user => {
+            const row = feesTableBody.insertRow();
+            row.classList.add('border-b', 'border-slate-200', 'dark:border-slate-700', 'last:border-b-0');
+
+            const feeStatus = user.fees?.status || 'N/A';
+            const feeAmount = user.fees?.amount !== undefined ? user.fees.amount.toFixed(2) : '0.00';
+            const feeDueDate = user.fees?.dueDate || 'N/A';
+            const feePaymentMethod = user.fees?.method || 'N/A';
+
+            let statusClass = '';
+            if (feeStatus === 'paid') {
+                statusClass = 'bg-emerald-100 text-emerald-800 dark:bg-emerald-700 dark:text-emerald-100';
+            } else if (feeStatus === 'unpaid') {
+                statusClass = 'bg-red-100 text-red-800 dark:bg-red-700 dark:text-red-100';
+            } else if (feeStatus === 'partially paid') {
+                statusClass = 'bg-yellow-100 text-yellow-800 dark:bg-yellow-700 dark:text-yellow-100';
+            }
+
+            let dueDateClass = '';
+            // Only apply overdue styling if status is unpaid AND due date is in the past
+            if (feeStatus === 'unpaid' && feeDueDate !== 'N/A' && new Date(feeDueDate) < new Date(today)) {
+                dueDateClass = 'text-red-600 font-semibold dark:text-red-400';
+                row.classList.add('bg-red-50', 'dark:bg-red-900/10'); // Highlight row if overdue
+            }
+
+            row.innerHTML = `
+                <td class="py-3 px-4 text-sm">${user.name}</td>
+                <td class="py-3 px-4 text-sm">${user.email}</td>
+                <td class="py-3 px-4 text-sm">
+                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${statusClass}">
+                        ${feeStatus.charAt(0).toUpperCase() + feeStatus.slice(1)}
+                    </span>
+                </td>
+                <td class="py-3 px-4 text-sm">₹${feeAmount}</td>
+                <td class="py-3 px-4 text-sm ${dueDateClass}">${feeDueDate}</td>
+                <td class="py-3 px-4 text-sm">${feePaymentMethod}</td>
+                <td class="py-3 px-4 text-sm space-x-2">
+                    <button data-id="${user._id}" class="update-fees-btn bg-indigo-500 text-white px-3 py-1 rounded-md text-xs font-semibold hover:bg-indigo-600 transition-colors">Update Fees</button>
+                </td>
+            `;
+            row.querySelector('.update-fees-btn').addEventListener('click', (e) => {
+                const userId = e.target.dataset.id;
+                const userToUpdate = allUsers.find(u => u._id === userId); // Assuming _id for user
+                if (userToUpdate) openFeeUpdateModal(userToUpdate);
+            });
+        });
+    }
+
+    async function updateFeesAction(userId, status, amount, method, dueDate, notes) {
+        if (status !== 'paid' && (isNaN(amount) || amount < 0)) {
+            showFormMessage(feeUpdateMessage, 'Amount must be a non-negative number.', 'error');
+            return;
+        }
+        if (status === 'paid' && (!method || method === '')) {
+             showFormMessage(feeUpdateMessage, 'Payment method is required for "Paid" status.', 'error');
+             return;
+        }
+        // Validate due date if provided
+        if (dueDate && isNaN(new Date(dueDate).getTime())) {
+            showFormMessage(feeUpdateMessage, 'Please enter a valid due date.', 'error');
+            return;
+        }
+
+        try {
+            const payload = {
+                fees: {
+                    status: status,
+                    amount: parseFloat(amount), // Ensure amount is a number
+                    method: method,
+                    dueDate: dueDate,
+                    notes: notes
+                }
+            };
+            const data = await makeApiRequest(`/users/${userId}`, 'PUT', payload); // Use global makeApiRequest
+            showToast(data.message || 'Fees updated successfully!', 'success'); // Use global showToast
+            closeFeeUpdateModal();
+            fetchFees(); // Refresh the list from the API
+            fetchOverviewStats(); // Update dashboard overview as well
+        } catch (error) {
+            console.error('Error updating fees:', error);
+            showFormMessage(feeUpdateMessage, error.message || 'Failed to update fees. Check console.', 'error'); // Use global showFormMessage
+        }
+    }
+
+    markFeePaidBtn.addEventListener('click', () => {
+        const amount = 0; // For "Paid", amount due is 0
+        const method = paymentMethodSelect.value;
+        const dueDate = feeDueDateInput.value;
+        const notes = feeNotesInput.value.trim();
+
+        if (currentUserIdForFeeUpdate) {
+            updateFeesAction(currentUserIdForFeeUpdate, 'paid', amount, method, dueDate, notes);
+        }
+    });
+
+    markFeePartiallyPaidBtn.addEventListener('click', () => {
+        let amount = parseFloat(feeAmountInput.value);
+        const method = paymentMethodSelect.value;
+        const dueDate = feeDueDateInput.value;
+        const notes = feeNotesInput.value.trim();
+
+        if (isNaN(amount) || amount <= 0) {
+            showFormMessage(feeUpdateMessage, 'For "Partially Paid", please enter an outstanding amount greater than zero.', 'error');
+            return;
+        }
+
+        if (currentUserIdForFeeUpdate) {
+            updateFeesAction(currentUserIdForFeeUpdate, 'partially paid', amount, method, dueDate, notes);
+        }
+    });
+
+    markFeeUnpaidBtn.addEventListener('click', () => {
+        let amount = parseFloat(feeAmountInput.value);
+        const method = paymentMethodSelect.value; // Method can still be selected for context
+        const dueDate = feeDueDateInput.value;
+        const notes = feeNotesInput.value.trim();
+
+        if (isNaN(amount) || amount < 0) {
+            showFormMessage(feeUpdateMessage, 'Please enter a valid non-negative amount for "Unpaid" status.', 'error');
+            return;
+        }
+
+        if (currentUserIdForFeeUpdate) {
+            updateFeesAction(currentUserIdForFeeUpdate, 'unpaid', amount, method, dueDate, notes);
+        }
+    });
+
+    cancelFeeUpdateBtn.addEventListener('click', closeFeeUpdateModal);
+    feeUpdateModal.addEventListener('click', (e) => {
+        if (e.target === feeUpdateModal) {
+            closeFeeUpdateModal();
+        }
+    });
+
+    filterStatusSelect.addEventListener('change', renderFeeRecords);
+    filterPaymentMethodSelect.addEventListener('change', renderFeeRecords);
+    searchUsersInput.addEventListener('input', renderFeeRecords);
+
+    // --- User Management Logic (now fetching from real API) ---
+    const usersTableBody = document.getElementById('usersTableBody');
+    async function fetchUsersForTable() {
+        setLoadingState(usersTableBody, 'Loading user data from API...', 4); // Use global helper
+        try {
+            const users = await makeApiRequest('/users'); // Use global makeApiRequest
+            usersTableBody.innerHTML = ''; // Clear loading message
+            if (users.length === 0) {
+                usersTableBody.innerHTML = `<tr><td colspan="4" class="px-6 py-4 text-center text-slate-500 dark:text-slate-400">No user data available from API.</td></tr>`;
+                return;
+            }
+            users.forEach(user => {
+                const row = usersTableBody.insertRow();
+                row.classList.add('border-b', 'border-slate-200', 'dark:border-slate-700', 'last:border-b-0');
+                row.innerHTML = `
+                    <td class="py-3 px-4 text-sm">${user.name}</td>
+                    <td class="py-3 px-4 text-sm">${user.email}</td>
+                    <td class="py-3 px-4 text-sm">${user.role.charAt(0).toUpperCase() + user.role.slice(1)}</td>
+                    <td class="py-3 px-4 text-sm">
+                        <button class="bg-blue-500 text-white px-3 py-1 rounded-md text-xs font-semibold hover:bg-blue-600 transition-colors">Edit</button>
+                        <button class="bg-red-500 text-white px-3 py-1 rounded-md text-xs font-semibold hover:bg-red-600 transition-colors ml-2">Delete</button>
+                    </td>
+                `;
+            });
+        } catch (error) {
+            console.error('Error fetching user data for management:', error);
+            usersTableBody.innerHTML = '<tr><td colspan="4" class="text-center py-4 text-red-500 dark:text-red-400">Failed to load user data. ' + error.message + '</td></tr>';
+            // showToast is already handled by makeApiRequest
+        }
+    }
+
+    // --- Complaints Management Logic (now fetching from real API) ---
+    const complaintsTableBody = document.getElementById('complaintsTableBody');
+    async function fetchComplaints() {
+        setLoadingState(complaintsTableBody, 'Loading complaint data from API...', 5); // Use global helper
+        try {
+            const allComplaints = await makeApiRequest('/complaints'); // Use global makeApiRequest
+            complaintsTableBody.innerHTML = '';
+            if (allComplaints.length === 0) {
+                complaintsTableBody.innerHTML = `<tr><td colspan="5" class="px-6 py-4 text-center text-slate-500 dark:text-slate-400">No complaint data available from API.</td></tr>`;
+                return;
+            }
+            allComplaints.forEach(complaint => {
+                const row = complaintsTableBody.insertRow();
+                row.classList.add('border-b', 'border-slate-200', 'dark:border-slate-700', 'last:border-b-0');
+                let statusClass = '';
+                if (complaint.status === 'pending') {
+                    statusClass = 'bg-yellow-100 text-yellow-800 dark:bg-yellow-700 dark:text-yellow-100';
+                } else if (complaint.status === 'resolved') {
+                    statusClass = 'bg-emerald-100 text-emerald-800 dark:bg-emerald-700 dark:text-emerald-100';
+                }
+                row.innerHTML = `
+                    <td class="py-3 px-4 text-sm">${complaint.id}</td>
+                    <td class="py-3 px-4 text-sm">${complaint.userName || 'N/A'}</td>
+                    <td class="py-3 px-4 text-sm">${complaint.subject}</td>
+                    <td class="py-3 px-4 text-sm">
+                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${statusClass}">
+                            ${complaint.status.charAt(0).toUpperCase() + complaint.status.slice(1)}
+                        </span>
+                    </td>
+                    <td class="py-3 px-4 text-sm">
+                        <button class="bg-blue-500 text-white px-3 py-1 rounded-md text-xs font-semibold hover:bg-blue-600 transition-colors">View</button>
+                        ${complaint.status === 'pending' ? `<button class="bg-green-500 text-white px-3 py-1 rounded-md text-xs font-semibold hover:bg-green-600 transition-colors ml-2">Resolve</button>` : ''}
+                    </td>
+                `;
+            });
+        } catch (error) {
+            console.error('Error fetching complaint data:', error);
+            complaintsTableBody.innerHTML = '<tr><td colspan="5" class="text-center py-4 text-red-500 dark:text-red-400">Failed to load complaint data. ' + error.message + '</td></tr>';
+            // showToast is already handled by makeApiRequest
+        }
+    }
+
+    // --- Announcements Management Logic (now fetching from real API) ---
+    const announcementsContent = document.getElementById('announcementsContent');
+    async function fetchAnnouncements() {
+        announcementsContent.innerHTML = `<p class="text-center text-slate-500 dark:text-slate-400">
+            <div class="flex items-center justify-center space-x-2">
+                <div class="loader"></div> <span>Loading announcements from API...</span>
+            </div>
+        </p>`;
+
+        try {
+            const announcements = await makeApiRequest('/announcements'); // Use global makeApiRequest
+            announcementsContent.innerHTML = ''; // Clear loading message
+            if (announcements.length === 0) {
+                announcementsContent.innerHTML = `<p class="px-6 py-4 text-center text-slate-500 dark:text-slate-400">No announcements available from API.</p>`;
+            } else {
+                announcements.forEach(announcement => {
+                    const annDiv = document.createElement('div');
+                    annDiv.className = 'p-4 bg-slate-50 dark:bg-slate-700 rounded-lg shadow-sm';
+                    annDiv.innerHTML = `
+                        <h4 class="font-semibold text-slate-800 dark:text-slate-200">${announcement.title || 'No Title'}</h4>
+                        <p class="text-sm text-slate-600 dark:text-slate-300">${announcement.content || 'No content provided.'}</p>
+                        <span class="text-xs text-slate-500 dark:text-slate-400">Posted: ${new Date(announcement.date).toLocaleDateString('en-IN') || 'N/A'}</span>
+                    `;
+                    announcementsContent.appendChild(annDiv);
+                });
+            }
+        } catch (error) {
+            console.error('Error fetching announcements:', error);
+            announcementsContent.innerHTML = `<p class="px-6 py-4 text-center text-red-500 dark:text-red-400">Failed to load announcements. ' + error.message + '</p>`;
+            // showToast is already handled by makeApiRequest
+        }
+    }
+
+
+    // --- Section Management Logic (unchanged, but uses global getAdminInfo) ---
+    const navLinks = document.querySelectorAll('.nav-link');
+    const dashboardSections = document.querySelectorAll('.dashboard-section');
+    const mainContentTitle = document.getElementById('mainContentTitle');
+    const mainContentSubtitle = document.getElementById('mainContentSubtitle');
+
+    function activateSection(sectionId) {
+        dashboardSections.forEach(section => {
+            if (section.id === sectionId) {
+                section.classList.add('active');
+            } else {
+                section.classList.remove('active');
+            }
+        });
+
+        navLinks.forEach(link => {
+            if (link.dataset.section === sectionId) {
+                link.classList.add('bg-indigo-50', 'dark:bg-slate-700', 'text-indigo-700', 'dark:text-white');
+                link.classList.remove('hover:bg-slate-100', 'dark:hover:bg-slate-700');
+            } else {
+                link.classList.remove('bg-indigo-50', 'dark:bg-slate-700', 'text-indigo-700', 'dark:text-white');
+                link.classList.add('hover:bg-slate-100', 'dark:hover:bg-slate-700');
+            }
+        });
+
+        const adminInfo = getAdminInfo(); // Use the global getAdminInfo
+        const adminName = adminInfo ? adminInfo.user.name : 'Admin';
+
+        switch (sectionId) {
+            case 'overview':
+                mainContentTitle.textContent = 'Admin Dashboard';
+                mainContentSubtitle.innerHTML = `Welcome back, <span id="adminNameDisplay">${adminName}</span>!`;
+                initializeDashboard();
+                break;
+            case 'users':
+                mainContentTitle.textContent = 'User Management';
+                mainContentSubtitle.textContent = 'Manage all registered users.';
+                fetchUsersForTable();
+                break;
+            case 'fees':
+                mainContentTitle.textContent = 'Fees Management';
+                mainContentSubtitle.textContent = 'Update user fees status (paid/unpaid) and amount.';
+                fetchFees();
+                break;
+            case 'complaints':
+                mainContentTitle.textContent = 'Complaints Management';
+                mainContentSubtitle.textContent = 'Review and resolve user complaints.';
+                fetchComplaints();
+                break;
+            case 'announcements':
+                mainContentTitle.textContent = 'Announcements Management';
+                mainContentSubtitle.textContent = 'Create and manage announcements for users.';
+                fetchAnnouncements();
+                break;
+            default:
+                mainContentTitle.textContent = 'Admin Dashboard';
+                mainContentSubtitle.innerHTML = `Welcome back, <span id="adminNameDisplay">${adminName}</span>!`;
+                initializeDashboard();
+        }
+    }
+
+    // Event listeners for sidebar navigation
+    navLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const sectionId = e.currentTarget.dataset.section;
+            activateSection(sectionId);
+        });
+    });
+
+    // --- Initial Load: Activate the Fees section by default ---
+    document.addEventListener('DOMContentLoaded', () => {
+        // This will activate the fees section and trigger fetchFees().
+        // If you want overview to load first, change 'fees' to 'overview'.
+        activateSection('fees');
+    });
+
+</script>
+   </body>
+</html>

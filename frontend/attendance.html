@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+     <link rel="shortcut icon" href="assests/logo.png" type="image/x-icon">
+    <title>Attendance Dashboard</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        /* Use the Inter font family */
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Add smooth transitions for a better user experience */
+        .transition-all {
+            transition: all 0.3s ease-in-out;
+        }
+        /* Simple scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #94a3b8;
+            border-radius: 10px;
+        }
+        .dark ::-webkit-scrollbar-track {
+            background: #1e293b;
+        }
+        .dark ::-webkit-scrollbar-thumb {
+            background: #475569;
+        }
+
+        /* Specific styles for the calendar attendance dots */
+        .dot {
+            width: 8px; /* Slightly larger for better visibility */
+            height: 8px; /* Slightly larger for better visibility */
+            border-radius: 50%;
+            position: absolute;
+            bottom: 2px; /* Adjusted position to be more visible */
+            left: 50%;
+            transform: translateX(-50%);
+            border: 1px solid rgba(255,255,255,0.7); /* Small border for visibility */
+            z-index: 10; /* Ensure dot is on top */
+        }
+        /* Green color for "Present" */
+        .present { background-color: #28a745; /* This is a shade of Green */ }
+        /* Red color for "Absent" */
+        .absent { background-color: #dc3545; /* This is a shade of Red */ }
+        /* Orange color for "Late" (if applicable) */
+        .late { background-color: #ffc107; /* Orange */ }
+
+        /* Specific calendar grid styling */
+        #calendarGrid div {
+            text-align: center;
+            padding: 8px 5px;
+            border-radius: 6px;
+            position: relative;
+            font-size: 0.9rem;
+            color: #555;
+             /* light background for days */
+            transition: background-color 0.3s ease;
+        }
+        .dark #calendarGrid div {
+            background-color: #1f2937; /* dark background for days */
+            color: #a1a1aa; /* slate-400 */
+        }
+        #calendarGrid div.hover\:bg-slate-100 { /* Explicit hover for light mode */
+             background-color: #f1f5f9;
+        }
+        .dark #calendarGrid div.hover\:bg-slate-700 { /* Explicit hover for dark mode */
+             background-color: #334155;
+        }
+        .weekday {
+            font-weight: bold;
+            color: #333;
+            background-color: #e2e8f0; /* slate-200 */
+        }
+        .dark .weekday {
+            background-color: #334155; /* slate-700 */
+            color: #d1d5db; /* slate-300 */
+        }
+        .today {
+            border: 2px solid #3b82f6; /* Blue-500 equivalent */
+            font-weight: bold;
+            color: #3b82f6;
+            background-color: #e0f2fe; /* Light blue background for today */
+        }
+        .dark .today {
+             background-color: #1e3a8a; /* Darker blue background for today in dark mode */
+             color: #93c5fd; /* Light blue text */
+        }
+
+        /* Animations for toast and list items */
+        @keyframes fade-in {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in { animation: fade-in 0.4s ease forwards; }
+
+        @keyframes fade-out {
+            from { opacity: 1; transform: scale(1); }
+            to { opacity: 0; transform: scale(0.9); }
+        }
+        .animate-fade-out { animation: fade-out 0.3s ease forwards; }
+
+    </style>
+    <script>
+        // Tailwind Dark Mode Configuration
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        indigo: { // Custom indigo to match the provided template
+                            50: '#eef2ff',
+                            100: '#e0e7ff',
+                            200: '#c7d2fe',
+                            300: '#a5b4fc',
+                            400: '#818cf8',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                            800: '#3730a3',
+                            900: '#312e81',
+                        }
+                    }
+                }
+            }
+        };
+    </script>
+</head>
+
+<body class="bg-slate-100 dark:bg-slate-900 text-slate-800 dark:text-slate-200 transition-all">
+
+    <div class="flex h-screen">
+
+        <aside class="w-64 flex-shrink-0 bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 flex flex-col transition-all">
+            <div class="h-16 flex items-center justify-center border-b border-slate-200 dark:border-slate-700">
+                <h1 class="text-xl font-bold text-indigo-600 dark:text-indigo-400">📚 HARIOM Library</h1>
+            </div>
+            <nav class="flex-1 px-4 py-6 space-y-2">
+                <a href="dashboard.html" class="flex items-center px-4 py-2 text-sm font-medium rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-3"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                    Overview
+                </a>
+                <a href="attendance.html" class="flex items-center px-4 py-2 text-sm font-medium rounded-lg bg-indigo-50 dark:bg-slate-700 text-indigo-700 dark:text-white">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-3"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                    Attendance
+                </a>
+                <a href="plans.html" class="flex items-center px-4 py-2 text-sm font-medium rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-3"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>
+                    Plans
+                </a>
+                <a href="fees.html" class="flex items-center px-4 py-2 text-sm font-medium rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-3"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></svg>
+                    Fees
+                </a>
+                <a href="timer.html" class="flex items-center px-4 py-2 text-sm font-medium rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-3"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    Timer
+                </a>
+            </nav>
+            <div class="px-4 py-6 border-t border-slate-200 dark:border-slate-700">
+                <button id="logoutBtn" class="flex items-center justify-center px-4 py-2 text-sm font-medium rounded-lg hover:bg-red-100 dark:hover:bg-red-900/50 text-red-600 dark:text-red-400 w-full">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-3"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
+                    Sign Out
+                </button>
+            </div>
+        </aside>
+
+        <main class="flex-1 p-6 lg:p-8 overflow-y-auto">
+            <div class="flex justify-between items-center mb-8">
+                <div>
+                    <h2 class="text-3xl font-bold">Attendance Dashboard</h2>
+                    <p class="text-slate-500 dark:text-slate-400">Track your attendance and insights.</p>
+                </div>
+                <div>
+                    <button id="theme-toggle" class="p-2 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700">
+                        <svg id="theme-toggle-dark-icon" class="w-6 h-6 hidden" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
+                        <svg id="theme-toggle-light-icon" class="w-6 h-6 hidden" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 5.05a1 1 0 010-1.414l.707-.707a1 1 0 011.414 1.414l-.707.707a1 1 0 01-1.414 0zM3 11a1 1 0 100-2H2a1 1 0 100 2h1z"></path></svg>
+                    </button>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6 lg:gap-8">
+
+                <div class="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow">
+                    <h3 class="text-xl font-semibold mb-4 text-slate-800 dark:text-slate-200">Attendance Overview</h3>
+                    <p class="text-5xl font-bold text-indigo-600 dark:text-indigo-400 mb-4 text-center" id="percent">--%</p>
+                    <div class="relative h-40 w-full"> <canvas id="attendanceChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow">
+                    <h3 class="text-xl font-semibold mb-4 text-slate-800 dark:text-slate-200">Statistics</h3>
+                    <p class="text-lg text-slate-700 dark:text-slate-300 mb-2"><strong class="text-emerald-600 dark:text-emerald-400" id="present">--</strong> Days Present</p>
+                    <p class="text-lg text-slate-700 dark:text-slate-300 mb-2"><strong class="text-rose-600 dark:text-rose-400" id="absent">--</strong> Days Absent</p>
+                    <p class="text-lg text-slate-700 dark:text-slate-300"><strong class="text-amber-500 dark:text-amber-300" id="late">--</strong> Days Late</p>
+                </div>
+
+                <div class="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow">
+                    <h3 class="text-xl font-semibold mb-4 text-slate-800 dark:text-slate-200">Alerts</h3>
+                    <ul id="alertList" class="space-y-3"></ul>
+                </div>
+
+                <div class="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow lg:col-span-1">
+                    <h3 class="text-xl font-semibold mb-4 text-slate-800 dark:text-slate-200">✅ Mark Attendance</h3>
+                    <p class="text-slate-500 dark:text-slate-400 mb-4">Let us know you're here today!</p>
+                    <div class="flex space-x-4">
+                        <button id="markPresentBtn" class="flex-1 bg-emerald-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-emerald-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 dark:focus:ring-offset-slate-800 transition-all">Mark Present</button>
+                        <button id="markAbsentBtn" class="flex-1 bg-rose-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-rose-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-rose-500 dark:focus:ring-offset-800 transition-all">Mark Absent</button>
+                    </div>
+                    <div id="markAttendanceMessage" class="mt-4 text-center text-sm font-medium"></div>
+                </div>
+
+                <div class="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow lg:col-span-full">
+                    <h3 class="text-xl font-semibold mb-4 text-slate-800 dark:text-slate-200" id="monthYearTitle">Loading...</h3>
+                    <div id="calendarGrid" class="grid grid-cols-7 gap-1"></div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <div id="toast" class="fixed bottom-5 right-5 bg-slate-900 dark:bg-white text-white dark:text-slate-900 py-3 px-5 rounded-lg shadow-xl text-sm font-semibold opacity-0 translate-y-10 transition-all duration-300">
+        Toast Message
+    </div>
+
+    <script>
+        // Global variables for today's date context
+        const today = new Date();
+        const currentMonth = today.getMonth();
+        const currentYear = today.getFullYear();
+        const currentDate = today.getDate();
+
+        // Variable to hold the Chart.js instance
+        let attendanceChartInstance = null;
+
+        // NEW: Define the base API URL consistently
+        const BASE_API_URL = 'http://localhost:5000/api/student'; // Assuming student-specific endpoints
+
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // --- Element Selectors ---
+            const logoutBtn = document.getElementById('logoutBtn');
+            const markPresentBtn = document.getElementById('markPresentBtn');
+            const markAbsentBtn = document.getElementById('markAbsentBtn');
+            const toast = document.getElementById('toast');
+            const markAttendanceMessage = document.getElementById('markAttendanceMessage'); // New element for mark status
+
+            document.getElementById("monthYearTitle").textContent =
+                today.toLocaleString('default', { month: 'long', year: 'numeric' }); // Include year in title
+
+            // Theme toggle logic
+            const themeToggleBtn = document.getElementById('theme-toggle');
+            const themeToggleDarkIcon = document.getElementById('theme-toggle-dark-icon');
+            const themeToggleLightIcon = document.getElementById('theme-toggle-light-icon');
+
+            const currentTheme = localStorage.getItem('theme');
+            if (currentTheme === 'dark') {
+                document.documentElement.classList.add('dark');
+                themeToggleDarkIcon.classList.remove('hidden');
+                themeToggleLightIcon.classList.add('hidden');
+            } else {
+                document.documentElement.classList.remove('dark');
+                themeToggleDarkIcon.classList.add('hidden');
+                themeToggleLightIcon.classList.remove('hidden');
+            }
+
+            themeToggleBtn.addEventListener('click', () => {
+                document.documentElement.classList.toggle('dark');
+                if (document.documentElement.classList.contains('dark')) {
+                    localStorage.setItem('theme', 'dark');
+                    themeToggleDarkIcon.classList.remove('hidden');
+                    themeToggleLightIcon.classList.add('hidden');
+                } else {
+                    localStorage.setItem('theme', 'light');
+                    themeToggleDarkIcon.classList.add('hidden');
+                    themeToggleLightIcon.classList.remove('hidden');
+                }
+            });
+
+
+            /**
+             * Retrieves user authentication data from localStorage.
+             * Redirects to login if data is missing or invalid.
+             * @returns {object|null} An object with token and user details, or null if redirection occurs.
+             */
+            function getLoggedInUser() {
+                const token = localStorage.getItem('token');
+                const userString = localStorage.getItem('user');
+
+                if (!token || !userString || userString === 'undefined' || userString === 'null') {
+                    console.warn("User data or token not found in localStorage. Redirecting to login.");
+                    // Only redirect if not already on index.html to prevent infinite loops
+                    if (!window.location.href.includes('index.html')) {
+                        window.location.href = 'index.html'; // Assuming index.html is your login page
+                    }
+                    return null;
+                }
+
+                try {
+                    const user = JSON.parse(userString);
+                    // MODIFIED: Check for user.id or user._id
+                    // Ensure user is a student as per dashboard logic
+                    if ((!user._id && !user.id) || !user.email || user.role !== 'student') {
+                        throw new Error("Missing essential user data or incorrect role in localStorage. Attempting re-login.");
+                    }
+                    return { token, user };
+                } catch (e) {
+                    console.error("Error parsing user data from localStorage:", e);
+                    console.warn("Invalid user data in localStorage. Redirecting to login.");
+                    localStorage.removeItem('token'); // Clear invalid token
+                    localStorage.removeItem('user'); // Clear invalid user data
+                    localStorage.removeItem('theme'); // Clear theme too
+                    // Only redirect if not already on index.html to prevent infinite loops
+                    if (!window.location.href.includes('index.html')) {
+                        window.location.href = 'index.html'; // Assuming index.html is your login page
+                    }
+                    return null;
+                }
+            }
+
+            /**
+             * Shows a toast notification with a message.
+             * @param {string} message The message to display.
+             * @param {string} type The type of toast ('success', 'error', 'info').
+             */
+            const showToast = (message, type = 'success') => {
+                toast.textContent = message;
+                // Clear all dynamic classes first
+                toast.classList.remove('bg-slate-900', 'bg-red-600', 'bg-blue-600', 'dark:bg-white', 'dark:bg-red-500', 'dark:bg-blue-500', 'text-white', 'dark:text-slate-900');
+
+                if (type === 'success') {
+                    toast.classList.add('bg-slate-900', 'dark:bg-white', 'text-white', 'dark:text-slate-900');
+                } else if (type === 'error') {
+                    toast.classList.add('bg-red-600', 'dark:bg-red-500', 'text-white');
+                } else if (type === 'info') {
+                    toast.classList.add('bg-blue-600', 'dark:bg-blue-500', 'text-white');
+                }
+
+                toast.classList.remove('opacity-0', 'translate-y-10');
+                setTimeout(() => {
+                    toast.classList.add('opacity-0', 'translate-y-10');
+                }, 3000);
+            };
+
+            /**
+             * Fetches attendance data from the backend and updates the UI.
+             */
+            const fetchAttendanceData = async () => {
+                const userAuth = getLoggedInUser();
+                if (!userAuth) return; // getLoggedInUser already redirected
+
+                try {
+                    const response = await fetch(`${BASE_API_URL}/attendance/my`, {
+                        method: 'GET',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${userAuth.token}`
+                        }
+                    });
+
+                    const data = await response.json();
+
+                    // --- START OF DEBUGGING LOGS ---
+                    console.log('--- Frontend: Data Received from Backend ---');
+                    console.log('Full Data Object:', data);
+                    console.log('Percentage:', data.percentage);
+                    console.log('Present:', data.present);
+                    console.log('Absent:', data.absent);
+                    console.log('Late:', data.late);
+                    console.log('Chart Data (cumulativePercentageData):', data.chartData);
+                    console.log('Chart Labels:', data.chartLabels);
+                    console.log('Attendance Days (for Calendar):', data.attendanceDays);
+                    console.log('--- END OF DEBUGGING LOGS ---');
+
+
+                    if (response.ok) {
+                        // Update statistics
+                        document.getElementById("percent").textContent = (data.percentage || 0) + "%";
+                        document.getElementById("present").textContent = data.present || 0;
+                        document.getElementById("absent").textContent = data.absent || 0;
+                        document.getElementById("late").textContent = data.late || 0;
+
+                        // Update alerts
+                        const alertList = document.getElementById("alertList");
+                        alertList.innerHTML = "";
+                        if (data.alerts && data.alerts.length > 0) {
+                            data.alerts.forEach(alert => {
+                                const li = document.createElement("li");
+                                li.className = "flex items-center justify-between bg-slate-100 dark:bg-slate-700 p-3 rounded-lg animate-fade-in text-sm";
+                                li.textContent = `${alert.message}`; // Removed daysAgo from display
+                                alertList.appendChild(li);
+                            });
+                        } else {
+                            const li = document.createElement("li");
+                            li.className = "text-slate-500 dark:text-slate-400 text-sm";
+                            li.textContent = "No new alerts.";
+                            alertList.appendChild(li);
+                        }
+
+                        // Update Chart.js data
+                        if (attendanceChartInstance) {
+                            attendanceChartInstance.destroy(); // Destroy previous chart instance
+                        }
+                        const ctx = document.getElementById('attendanceChart').getContext('2d');
+                        attendanceChartInstance = new Chart(ctx, {
+                            type: 'line',
+                            data: {
+                                // Using data.chartLabels and data.chartData directly
+                                labels: data.chartLabels ?? [],
+                                datasets: [{
+                                    data: data.chartData ?? [],
+                                    backgroundColor: 'rgba(99, 102, 241, 0.1)', /* Indigo-500 with opacity */
+                                    borderColor: '#6366f1', /* Indigo-500 */
+                                    tension: 0.4,
+                                    fill: true,
+                                    pointRadius: 5 // Changed from 0 to 5 to make single points visible
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: { legend: { display: false } },
+                                scales: {
+                                    x: { grid: { display: false }, ticks: { display: false } },
+                                    y: {
+                                        beginAtZero: true,
+                                        max: 100,
+                                        ticks: { stepSize: 25, callback: function(value) { return value + '%'; }, color: 'rgb(100 116 139)' },
+                                        grid: { color: 'rgb(226 232 240 / 0.1)' }
+                                    }
+                                }
+                            }
+                        });
+
+                        // Regenerate calendar with fetched attendance days
+                        generateCalendar(data.attendanceDays ?? {});
+                        // Check today's attendance status
+                        checkIfAttendanceMarkedForToday(data.attendanceDays ?? {});
+
+                    } else {
+                        showToast(data.message || 'Failed to load attendance history.', 'error');
+                        // Set fallback UI elements
+                        document.getElementById("percent").textContent = "N/A";
+                        document.getElementById("present").textContent = "N/A";
+                        document.getElementById("absent").textContent = "N/A";
+                        document.getElementById("late").textContent = "N/A";
+                        document.getElementById("alertList").innerHTML = "<li class='text-red-500 dark:text-red-400 text-sm'>Error loading alerts or data.</li>";
+                        generateCalendar({}); // Generate empty calendar on error
+                        markAttendanceMessage.textContent = 'Failed to load attendance data.';
+                        markAttendanceMessage.className = 'mt-4 text-center text-sm font-medium text-red-600 dark:text-red-400';
+                    }
+
+                } catch (error) {
+                    console.error("Error fetching attendance data:", error);
+                    showToast('Network error: Could not connect to attendance server.', 'error');
+                    // Set fallback UI elements
+                    document.getElementById("percent").textContent = "N/A";
+                    document.getElementById("present").textContent = "N/A";
+                    document.getElementById("absent").textContent = "N/A";
+                    document.getElementById("late").textContent = "N/A";
+                    document.getElementById("alertList").innerHTML = "<li class='text-red-500 dark:text-red-400 text-sm'>Network error: Could not load data.</li>";
+                    generateCalendar({}); // Generate empty calendar on network error
+                    markAttendanceMessage.textContent = 'Network error: Could not load attendance data.';
+                    markAttendanceMessage.className = 'mt-4 text-center text-sm font-medium text-red-600 dark:text-red-400';
+                }
+            };
+
+            /**
+             * Handles marking attendance (Present or Absent).
+             * @param {string} status 'Present' or 'Absent'.
+             */
+            const markAttendance = async (status) => {
+                const userAuth = getLoggedInUser();
+                if (!userAuth) return;
+
+                markAttendanceMessage.textContent = 'Marking attendance...';
+                markAttendanceMessage.className = 'mt-4 text-center text-sm font-medium text-slate-500 dark:text-slate-400';
+
+                // Format today's date for backend (YYYY-MM-DD)
+                const todayFormatted = new Date().toLocaleDateString('en-CA'); // Output format: YYYY-MM-DD (safe in local timezone)
+
+                try {
+                    const response = await fetch(`${BASE_API_URL}/attendance`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${userAuth.token}`
+                        },
+                        body: JSON.stringify({
+                            date: todayFormatted,
+                            status: status
+                        })
+                    });
+
+                    const data = await response.json();
+
+                    if (response.ok) {
+                        showToast(data.message || `Attendance marked as ${status}.`, 'success');
+                        markAttendanceMessage.textContent = `Attendance for ${todayFormatted} marked as ${status}.`;
+                        markAttendanceMessage.className = 'mt-4 text-center text-sm font-medium text-emerald-600 dark:text-emerald-400';
+                        // Refresh data after successful marking
+                        fetchAttendanceData();
+                    } else {
+                        showToast(data.message || `Failed to mark attendance as ${status}.`, 'error');
+                        markAttendanceMessage.textContent = data.message || `Failed to mark attendance.`;
+                        markAttendanceMessage.className = 'mt-4 text-center text-sm font-medium text-red-600 dark:text-red-400';
+                    }
+                } catch (error) {
+                    console.error('Error marking attendance:', error);
+                    showToast('Network error: Could not mark attendance.', 'error');
+                    markAttendanceMessage.textContent = 'Network error: Could not mark attendance.';
+                    markAttendanceMessage.className = 'mt-4 text-center text-sm font-medium text-red-600 dark:text-red-400';
+                }
+            };
+
+            /**
+             * Calendar generation function (remains largely the same, but now uses real data).
+             * @param {object} attendanceDays An object mapping YYYY-MM-DD dates to status strings.
+             */
+            function generateCalendar(attendanceDays) {
+                const calendarGrid = document.getElementById("calendarGrid");
+                calendarGrid.innerHTML = ""; // Clear existing calendar
+
+                const weekdays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+                weekdays.forEach(day => {
+                    const header = document.createElement("div");
+                    header.textContent = day;
+                    header.classList.add("weekday", "transition-all");
+                    calendarGrid.appendChild(header);
+                });
+
+                const firstDayOfMonth = new Date(currentYear, currentMonth, 1).getDay();
+                const totalDaysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+
+                // Add empty cells for days before the 1st of the month
+                for (let i = 0; i < firstDayOfMonth; i++) {
+                    const empty = document.createElement("div");
+                    calendarGrid.appendChild(empty);
+                }
+
+                // Populate calendar with days and attendance status
+                for (let day = 1; day <= totalDaysInMonth; day++) {
+                    const cell = document.createElement("div");
+                    cell.textContent = day;
+                    cell.classList.add("bg-slate-50", "dark:bg-slate-700/50", "hover:bg-slate-100", "dark:hover:bg-slate-700", "transition-all");
+
+                    // Format date for lookup in attendanceDays object
+                    const dateObj = new Date(currentYear, currentMonth, day);
+                  const dateStr = dateObj.toLocaleDateString('en-CA'); // Local date, no timezone shift
+
+
+                    // Mark today's date
+                    if (day === currentDate && currentMonth === today.getMonth() && currentYear === today.getFullYear()) {
+                        cell.classList.add("today");
+                    }
+
+                    // Add attendance dot if status exists for this date
+                    const status = attendanceDays[dateStr];
+                    if (status) {
+                        const dot = document.createElement("div");
+                        dot.classList.add("dot");
+                        // Use correct class names based on your status values (case-insensitive)
+                        if (status.toLowerCase() === 'present') {
+                            dot.classList.add("present");
+                        } else if (status.toLowerCase() === 'absent') {
+                            dot.classList.add("absent");
+                        } else if (status.toLowerCase() === 'late') {
+                            dot.classList.add("late");
+                        }
+                        cell.appendChild(dot);
+                    }
+
+                    calendarGrid.appendChild(cell);
+                }
+            }
+
+            /**
+             * Checks if attendance for today has already been marked and updates the UI accordingly.
+             * @param {object} attendanceDays Object mapping dates (YYYY-MM-DD) to attendance status.
+             */
+            const checkIfAttendanceMarkedForToday = (attendanceDays) => {
+        const todayFormatted = new Date().toLocaleDateString('en-CA');
+
+
+                const statusForToday = attendanceDays[todayFormatted];
+
+                if (statusForToday) {
+                    markPresentBtn.disabled = true;
+                    markAbsentBtn.disabled = true;
+                    markPresentBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                    markAbsentBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                    markAttendanceMessage.textContent = `Attendance for today (${todayFormatted}) is already marked as: ${statusForToday}.`;
+                    // Determine message color based on status
+                    if (statusForToday.toLowerCase() === 'present') {
+                        markAttendanceMessage.className = 'mt-4 text-center text-sm font-medium text-emerald-600 dark:text-emerald-400';
+                    } else if (statusForToday.toLowerCase() === 'absent') {
+                        markAttendanceMessage.className = 'mt-4 text-center text-sm font-medium text-rose-600 dark:text-rose-400';
+                    } else if (statusForToday.toLowerCase() === 'late') {
+                        dot.classList.add("late"); // Ensure late dot is applied if status is 'late'
+                        markAttendanceMessage.className = 'mt-4 text-center text-sm font-medium text-amber-600 dark:text-amber-400';
+                    }
+                } else {
+                    markPresentBtn.disabled = false;
+                    markAbsentBtn.disabled = false;
+                    markPresentBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                    markAbsentBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                    markAttendanceMessage.textContent = 'Mark your attendance for today.';
+                    markAttendanceMessage.className = 'mt-4 text-center text-sm font-medium text-slate-500 dark:text-slate-400';
+                }
+            };
+
+            // --- Event Listeners ---
+            markPresentBtn.addEventListener('click', () => markAttendance('present'));
+            markAbsentBtn.addEventListener('click', () => markAttendance('absent'));
+
+            logoutBtn.addEventListener('click', () => {
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                localStorage.removeItem('theme'); // Clear theme too
+                showToast('You have been logged out.', 'success');
+                setTimeout(() => {
+                    window.location.href = 'index.html'; // Redirect to login page
+                }, 1000);
+            });
+
+            // Initial data fetch and calendar generation
+            fetchAttendanceData();
+        });
+    </script>
+</body>
+
+</html>

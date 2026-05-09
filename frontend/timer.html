@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+     <link rel="shortcut icon" href="assests/logo.png" type="image/x-icon">
+    <title>Interactive Timer Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        /* Use the Inter font family */
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Add smooth transitions for a better user experience */
+        .transition-all {
+            transition: all 0.3s ease-in-out;
+        }
+        /* Simple scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9; /* slate-100 */
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #94a3b8; /* slate-400 */
+            border-radius: 10px;
+        }
+        .dark ::-webkit-scrollbar-track {
+            background: #1e293b; /* slate-800 */
+        }
+        .dark ::-webkit-scrollbar-thumb {
+            background: #475569; /* slate-600 */
+        }
+        /* Custom styles for the large timer display digits, to match the image spacing */
+        .large-timer-digit {
+            min-width: 0.8em; /* Adjust as needed for better spacing */
+            display: inline-block;
+            text-align: center;
+            border: none;
+            outline: none;
+            cursor: text; /* Indicate it's editable */
+        }
+        .large-timer-digit:focus {
+            background-color: #e2e8f0; /* slate-200 Light background on focus */
+            border-radius: 4px;
+            /* Add some padding on focus to make it look like an input field */
+            padding: 0 4px;
+        }
+        .dark .large-timer-digit:focus {
+            background-color: #334155; /* slate-700 Dark background on focus */
+        }
+
+        /* Animations for toast */
+        @keyframes fade-in {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in { animation: fade-in 0.4s ease forwards; }
+
+        @keyframes fade-out {
+            from { opacity: 1; transform: scale(1); }
+            to { opacity: 0; transform: scale(0.9); }
+        }
+        .animate-fade-out { animation: fade-out 0.3s ease forwards; }
+    </style>
+    <script>
+        // Tailwind Dark Mode Configuration
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-slate-100 dark:bg-slate-900 text-slate-800 dark:text-slate-200 transition-all">
+
+    <div class="flex h-screen">
+
+        <aside class="w-64 flex-shrink-0 bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 flex flex-col transition-all">
+            <div class="h-16 flex items-center justify-center border-b border-slate-200 dark:border-slate-700">
+                <h1 class="text-xl font-bold text-indigo-600 dark:text-indigo-400">📚 HARIOM Library</h1>
+            </div>
+            <nav class="flex-1 px-4 py-6 space-y-2">
+                <a href="dashboard.html" class="flex items-center px-4 py-2 text-sm font-medium rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-3"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                    Overview
+                </a>
+                <a href="attendance.html" class="flex items-center px-4 py-2 text-sm font-medium rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-3"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                    Attendance
+                </a>
+                <a href="plans.html" class="flex items-center px-4 py-2 text-sm font-medium rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-3"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>
+                    Plans
+                </a>
+                <a href="fees.html" class="flex items-center px-4 py-2 text-sm font-medium rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-3"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></svg>
+                    Fees
+                </a>
+                <a href="timer.html" class="flex items-center px-4 py-2 text-sm font-medium rounded-lg bg-indigo-50 dark:bg-slate-700 text-indigo-700 dark:text-white">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-3"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    Timer
+                </a>
+            </nav>
+            <div class="px-4 py-6 border-t border-slate-200 dark:border-slate-700">
+                <button id="logoutBtn" class="flex items-center justify-center px-4 py-2 text-sm font-medium rounded-lg hover:bg-red-100 dark:hover:bg-red-900/50 text-red-600 dark:text-red-400 w-full">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-3"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
+                    Sign Out
+                </button>
+            </div>
+        </aside>
+
+        <main class="flex-1 p-6 lg:p-8 overflow-y-auto">
+            <div class="flex justify-between items-center mb-8">
+                <div>
+                    <h2 class="text-3xl font-bold">Timer</h2>
+                    <p class="text-slate-500 dark:text-slate-400">Set your focus time or break duration, <span id="usernameDisplay" class="font-medium"></span>!</p>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button id="theme-toggle" class="p-2 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700">
+                        <svg id="theme-toggle-dark-icon" class="w-6 h-6 hidden" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
+                        <svg id="theme-toggle-light-icon" class="w-6 h-6 hidden" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 5.05a1 1 0 010-1.414l.707-.707a1 1 0 011.414 1.414l-.707.707a1 1 0 01-1.414 0zM3 11a1 1 0 100-2H2a1 1 0 100 2h1z"></path></svg>
+                    </button>
+                    
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
+
+                <div class="bg-white dark:bg-slate-800 p-8 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-700 flex flex-col items-center col-span-full lg:col-span-1">
+                    <h2 class="text-3xl font-bold mb-6 text-center text-slate-800 dark:text-slate-200">Set Your Timer</h2>
+                    <input type="text" id="timerTitle" placeholder="What are you working on? (Optional)" class="w-3/4 p-3 mb-6 border border-slate-300 dark:border-slate-600 rounded-lg text-center text-lg bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all">
+
+                    <div id="mainTimerDisplay" class="flex justify-center items-center gap-4 text-8xl font-mono text-slate-700 dark:text-slate-300 mb-12">
+                        <span class="large-timer-digit" id="mainHours" contenteditable="true" aria-label="Hours">00</span>
+                        <span class="text-slate-400 dark:text-slate-500">:</span>
+                        <span class="large-timer-digit" id="mainMinutes" contenteditable="true" aria-label="Minutes">00</span>
+                        <span class="text-slate-400 dark:text-slate-500">:</span>
+                        <span class="large-timer-digit" id="mainSeconds" contenteditable="true" aria-label="Seconds">00</span>
+                    </div>
+
+                    <div class="flex gap-4 mb-4">
+                        <button id="mainTimerStartPause" class="bg-emerald-500 hover:bg-emerald-600 text-white font-semibold py-3 px-8 rounded-xl shadow-md transition duration-300 ease-in-out transform hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-slate-800 text-lg">
+                            Start
+                        </button>
+                        <button id="mainTimerReset" class="bg-rose-500 hover:bg-rose-600 text-white font-semibold py-3 px-8 rounded-xl shadow-md transition duration-300 ease-in-out transform hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-rose-400 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-slate-800 text-lg">
+                            Reset
+                        </button>
+                    </div>
+                </div>
+
+                <div class="bg-white dark:bg-slate-800 p-8 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-700 flex flex-col col-span-full lg:col-span-1">
+                    <h2 class="text-3xl font-bold mb-6 text-slate-800 dark:text-slate-200 text-center">Session History</h2>
+                    <div id="sessionHistoryList" class="flex-grow overflow-y-auto">
+                        <p id="loadingSessionsMessage" class="text-lg text-indigo-500 dark:text-indigo-400 text-center animate-pulse hidden">Loading sessions...</p>
+                        <p id="noSessionsMessage" class="text-lg text-slate-500 dark:text-slate-400 text-center">
+                            No sessions completed yet.
+                        </p>
+                        </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <audio id="alarmAudio" src="https://www.soundjay.com/misc/sounds/bell-ringing-05.mp3" preload="auto"></audio>
+
+    <div id="toast" class="fixed bottom-5 right-5 py-3 px-5 rounded-lg shadow-xl text-sm font-semibold opacity-0 translate-y-10 transition-all duration-300">
+        Toast Message
+    </div>
+
+    <script>
+        // Define API Base URL - Make sure this matches your backend URL
+        const BASE_API_URL = 'http://localhost:5000/api/student'; // Ensure this points to your Node.js backend
+
+        // Single Main Timer State
+        let mainTimerInitialSeconds = 0; // Stores the value set by user initially for reset
+        let mainTimerRemainingSeconds = 0;
+        let mainTimerIsRunning = false;
+        let timerInterval; // To hold the setInterval ID for the main countdown
+        let sessionStartTime; // To record when the timer officially starts
+        let sessionEndTime;   // To record when the timer officially ends
+
+        // Session History State (will be loaded from/saved to backend)
+        let sessionHistory = [];
+
+        // DOM Elements
+        const alarmAudio = document.getElementById('alarmAudio');
+        const toast = document.getElementById('toast');
+
+        const mainHoursDisplay = document.getElementById('mainHours');
+        const mainMinutesDisplay = document.getElementById('mainMinutes');
+        const mainSecondsDisplay = document.getElementById('mainSeconds');
+        const mainTimerStartPauseButton = document.getElementById('mainTimerStartPause');
+        const mainTimerResetButton = document.getElementById('mainTimerReset');
+        const timerTitleInput = document.getElementById('timerTitle');
+
+        const currentTimeDisplay = document.getElementById('current-time');
+        const currentDateDisplay = document.getElementById('current-date');
+        const sessionHistoryList = document.getElementById('sessionHistoryList');
+        const noSessionsMessage = document.getElementById('noSessionsMessage');
+        const loadingSessionsMessage = document.getElementById('loadingSessionsMessage');
+        const usernameDisplay = document.getElementById('usernameDisplay');
+
+
+        // Dark Mode Toggle Elements
+        const themeToggleBtn = document.getElementById('theme-toggle');
+        const darkIcon = document.getElementById('theme-toggle-dark-icon');
+        const lightIcon = document.getElementById('theme-toggle-light-icon');
+        const logoutBtn = document.getElementById('logoutBtn');
+
+
+        /**
+         * Shows a toast notification with a message.
+         * @param {string} message The message to display.
+         * @param {string} type The type of toast ('success' or 'error').
+         */
+        const showToast = (message, type = 'success') => {
+            toast.textContent = message;
+            // Reset classes
+            toast.className = 'fixed bottom-5 right-5 py-3 px-5 rounded-lg shadow-xl text-sm font-semibold opacity-0 translate-y-10 transition-all duration-300 animate-fade-in';
+
+            if (type === 'success') {
+                toast.classList.add('bg-slate-900', 'dark:bg-white', 'text-white', 'dark:text-slate-900');
+            } else { // 'error'
+                toast.classList.add('bg-red-600', 'dark:bg-red-500', 'text-white');
+            }
+
+            // Hide after 3 seconds
+            setTimeout(() => {
+                toast.classList.remove('animate-fade-in');
+                toast.classList.add('animate-fade-out');
+                setTimeout(() => {
+                    toast.classList.remove('opacity-0', 'translate-y-10', 'animate-fade-out');
+                }, 300); // Wait for fade-out animation to complete
+            }, 3000);
+        };
+
+        /**
+         * Generic function for making authenticated API requests.
+         * @param {string} url The API endpoint (e.g., '/timer').
+         * @param {string} method HTTP method (e.g., 'GET', 'POST').
+         * @param {object} data Optional: data to send in the request body for POST/PUT.
+         * @returns {Promise<object>} The JSON response from the API.
+         */
+        async function makeApiRequest(url, method, data = null) {
+            const token = localStorage.getItem('token'); // Get token from localStorage
+            const headers = {
+                'Content-Type': 'application/json',
+            };
+            if (token) {
+                headers['Authorization'] = `Bearer ${token}`; // Attach token if available
+            }
+
+            const options = {
+                method,
+                headers,
+                body: data ? JSON.stringify(data) : null,
+            };
+
+            try {
+                const response = await fetch(`${BASE_API_URL}${url}`, options);
+                const result = await response.json();
+
+                if (!response.ok) {
+                    if (response.status === 401) {
+                        localStorage.removeItem('token');
+                        localStorage.removeItem('username');
+                        showToast("Your session expired. Please log in again.", 'error');
+                        setTimeout(() => { window.location.href = 'login.html'; }, 1000);
+                        throw new Error("Redirecting to login..."); // Prevent further execution
+                    }
+                    throw new Error(result.message || `API Error: ${response.statusText}`);
+                }
+                return result;
+            } catch (error) {
+                console.error(`API Request failed for ${url}:`, error);
+                // Only show toast if it's not a handled 401 redirect
+                if (!error.message.includes("Redirecting")) {
+                    showToast(error.message, 'error');
+                }
+                throw error; // Re-throw to be caught by specific handlers
+            }
+        }
+
+        /**
+         * Loads session history from the backend.
+         */
+        async function loadSessions() {
+            loadingSessionsMessage.classList.remove('hidden');
+            noSessionsMessage.classList.add('hidden'); // Hide no sessions message while loading
+            try {
+                // Ensure the endpoint matches your backend route for fetching sessions
+                const data = await makeApiRequest('/timer/my', 'GET');
+                sessionHistory = data || []; // Backend returns an array directly
+                renderSessionHistory();
+                showToast('Session history loaded.', 'success');
+            } catch (error) {
+                console.error('Failed to load session history:', error);
+                sessionHistory = []; // Clear history on error
+                renderSessionHistory(); // Render to show 'No sessions completed' if failed
+            } finally {
+                loadingSessionsMessage.classList.add('hidden');
+            }
+        }
+
+        /**
+         * Saves a new completed session to the backend.
+         * @param {number} durationSeconds The duration of the completed session in seconds.
+         * @param {Date} startTime The Date object when the timer started.
+         * @param {Date} endTime The Date object when the timer ended.
+         * @param {string} title Optional title for the session.
+         */
+        async function saveSession(durationSeconds, startTime, endTime, title = '') {
+            if (durationSeconds <= 0) {
+                // Only save meaningful sessions
+                return;
+            }
+            try {
+                const newSessionData = {
+                    durationSeconds: durationSeconds,
+                    startTime: startTime.toISOString(), // ISO string format
+                    endTime: endTime.toISOString(),     // ISO string format
+                    title: title.trim() || 'Untitled Session' // Use provided title or default
+                };
+                const result = await makeApiRequest('/timer', 'POST', newSessionData); // Use /api/timer
+                if (result) {
+                    // Add the session returned by the server (might have _id, etc.)
+                    sessionHistory.unshift(result); // Add to the beginning to show newest first
+                    renderSessionHistory();
+                    showToast('Session saved successfully!', 'success');
+                }
+            } catch (error) {
+                console.error('Failed to save session:', error);
+            }
+        }
+
+        // Function to parse the current input in main timer display into total seconds
+        function readMainTimerInput() {
+            const hours = parseInt(mainHoursDisplay.textContent) || 0;
+            const minutes = parseInt(mainMinutesDisplay.textContent) || 0;
+            const seconds = parseInt(mainSecondsDisplay.textContent) || 0;
+
+            // Basic validation for minutes and seconds
+            if (minutes < 0 || seconds < 0 || minutes >= 60 || seconds >= 60) {
+                // Do not show toast here as it will trigger on every key stroke
+                // Validation will be handled before starting the timer
+                return 0; // Return 0 if invalid to prevent negative time
+            }
+            return hours * 3600 + minutes * 60 + seconds;
+        }
+
+        // Function to format seconds into HH:MM:SS string
+        function formatTime(totalSeconds) {
+            const hours = Math.floor(totalSeconds / 3600);
+            const minutes = Math.floor((totalSeconds % 3600) / 60);
+            const seconds = totalSeconds % 60;
+
+            return [hours, minutes, seconds]
+                .map(unit => unit.toString().padStart(2, '0'))
+                .join(':');
+        }
+
+        // Function to update the main 00:00:00 display from mainTimerRemainingSeconds
+        function updateMainTimerDisplay() {
+            const displayTime = formatTime(mainTimerRemainingSeconds);
+            const parts = displayTime.split(':');
+            mainHoursDisplay.textContent = parts[0];
+            mainMinutesDisplay.textContent = parts[1];
+            mainSecondsDisplay.textContent = parts[2];
+        }
+
+        // Function to render the session history
+        function renderSessionHistory() {
+            sessionHistoryList.innerHTML = ''; // Clear existing entries
+            if (sessionHistory.length === 0) {
+                noSessionsMessage.classList.remove('hidden');
+            } else {
+                noSessionsMessage.classList.add('hidden');
+                // Sort history from newest to oldest by endTime (assuming ISO string from backend)
+                const sortedHistory = [...sessionHistory].sort((a, b) => new Date(b.endTime) - new Date(a.endTime));
+                sortedHistory.forEach(session => {
+                    const sessionEntry = document.createElement('div');
+                    sessionEntry.className = 'bg-slate-50 dark:bg-slate-700 p-4 rounded-lg shadow-sm mb-3 border border-slate-200 dark:border-slate-600 flex justify-between items-center';
+
+                    // Parse dates correctly, handling both number (old client-side) and ISO string (backend)
+                    const sessionStartTimeObj = new Date(session.startTime);
+                    const sessionEndTimeObj = new Date(session.endTime);
+
+                    sessionEntry.innerHTML = `
+                        <div>
+                            <p class="font-semibold text-slate-700 dark:text-slate-200 text-lg">${session.title || 'Untitled Session'}</p>
+                            <p class="text-md text-slate-600 dark:text-slate-300">Duration: ${formatTime(session.durationSeconds)}</p>
+                            <p class="text-xs text-slate-500 dark:text-slate-400">
+                                Started: ${sessionStartTimeObj.toLocaleTimeString()} on ${sessionStartTimeObj.toLocaleDateString()}
+                            </p>
+                            <p class="text-xs text-slate-500 dark:text-slate-400">
+                                Ended: ${sessionEndTimeObj.toLocaleTimeString()} on ${sessionEndTimeObj.toLocaleDateString()}
+                            </p>
+                        </div>
+                        <button class="delete-session-btn text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 p-2 rounded-full hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors" data-id="${session._id}" title="Delete session">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+                        </button>
+                    `;
+                    sessionHistoryList.appendChild(sessionEntry);
+                });
+
+                // Attach event listeners to delete buttons after rendering
+                document.querySelectorAll('.delete-session-btn').forEach(button => {
+                    button.addEventListener('click', async (event) => {
+                        const sessionId = event.currentTarget.dataset.id;
+                        if (confirm('Are you sure you want to delete this session?')) {
+                            try {
+                                await makeApiRequest(`/timer/${sessionId}`, 'DELETE');
+                                showToast('Session deleted successfully!', 'success');
+                                // Remove from local history and re-render
+                                sessionHistory = sessionHistory.filter(session => session._id !== sessionId);
+                                renderSessionHistory();
+                            } catch (error) {
+                                console.error('Error deleting session:', error);
+                                // Toast already shown by makeApiRequest
+                            }
+                        }
+                    });
+                });
+            }
+        }
+
+
+        // Event listeners for contenteditable spans (direct input)
+        [mainHoursDisplay, mainMinutesDisplay, mainSecondsDisplay].forEach(element => {
+            element.addEventListener('input', () => {
+                let value = element.textContent.replace(/\D/g, ''); // Allow only digits
+                // Restrict input length to 2 characters for minutes and seconds, but not hours
+                if (element.id !== 'mainHours' && value.length > 2) {
+                    value = value.substring(0, 2);
+                }
+                element.textContent = value; // Update the contenteditable span
+                // Update remaining seconds based on current input in all fields
+                mainTimerRemainingSeconds = readMainTimerInput();
+                mainTimerInitialSeconds = mainTimerRemainingSeconds; // Also update initial for reset
+            });
+
+            element.addEventListener('blur', () => {
+                let value = parseInt(element.textContent) || 0;
+                // Pad with '0' only for minutes and seconds, if less than 10
+                if (element.id !== 'mainHours') {
+                    // Ensure minutes/seconds don't exceed 59 on blur
+                    value = Math.min(value, 59);
+                    element.textContent = value.toString().padStart(2, '0');
+                } else {
+                    element.textContent = value.toString(); // Hours can be single or multiple digits
+                }
+                // Re-read after blur to ensure accurate state update after padding
+                mainTimerRemainingSeconds = readMainTimerInput();
+                mainTimerInitialSeconds = mainTimerRemainingSeconds; // Also update initial for reset
+            });
+
+            // Prevent newlines in contenteditable
+            element.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault(); // Prevent new line
+                    element.blur();     // Blur the element to trigger blur event
+                }
+            });
+        });
+
+        // Start/Pause button logic
+        mainTimerStartPauseButton.addEventListener('click', () => {
+            if (!mainTimerIsRunning) { // If timer is currently paused or stopped
+                // Validate input before starting
+                const currentInputSeconds = readMainTimerInput();
+                if (currentInputSeconds <= 0) {
+                    showToast('Please set a valid timer duration (e.g., "00:01:00" for 1 minute) before starting.', 'error');
+                    return;
+                }
+                // If starting fresh or resuming
+                if (mainTimerRemainingSeconds === 0) {
+                    mainTimerRemainingSeconds = currentInputSeconds;
+                    mainTimerInitialSeconds = currentInputSeconds; // Set initial for reset
+                }
+                sessionStartTime = new Date(); // Record start time only when first starting or resuming from 0
+                mainTimerIsRunning = true;
+                startTimerCountdown(); // Start or resume the countdown
+            } else { // If timer is currently running, pause it
+                mainTimerIsRunning = false;
+                clearInterval(timerInterval); // Pause the interval
+            }
+
+            mainTimerStartPauseButton.textContent = mainTimerIsRunning ? 'Pause' : 'Start';
+            mainTimerStartPauseButton.classList.toggle('bg-emerald-500', !mainTimerIsRunning);
+            mainTimerStartPauseButton.classList.toggle('hover:bg-emerald-600', !mainTimerIsRunning);
+            mainTimerStartPauseButton.classList.toggle('bg-orange-500', mainTimerIsRunning);
+            mainTimerStartPauseButton.classList.toggle('hover:bg-orange-600', mainTimerIsRunning);
+            mainTimerStartPauseButton.classList.toggle('focus:ring-emerald-400', !mainTimerIsRunning);
+            mainTimerStartPauseButton.classList.toggle('focus:ring-orange-400', mainTimerIsRunning);
+
+            // Toggle contenteditable based on timer running state
+            const isEditable = !mainTimerIsRunning;
+            mainHoursDisplay.contentEditable = isEditable;
+            mainMinutesDisplay.contentEditable = isEditable;
+            mainSecondsDisplay.contentEditable = isEditable;
+            timerTitleInput.readOnly = !isEditable; // Make title read-only when timer is running
+        });
+
+        // Reset button logic
+        mainTimerResetButton.addEventListener('click', () => {
+            mainTimerIsRunning = false;
+            clearInterval(timerInterval); // Stop the interval
+            mainTimerRemainingSeconds = mainTimerInitialSeconds; // Reset to the value it was when set/last edited
+            if (mainTimerInitialSeconds === 0) { // If initial was 0, ensure display also resets to 00:00:00
+                mainHoursDisplay.textContent = '00';
+                mainMinutesDisplay.textContent = '00';
+                mainSecondsDisplay.textContent = '00';
+            } else {
+                updateMainTimerDisplay(); // Update display to show the initial set time
+            }
+            mainTimerStartPauseButton.textContent = 'Start';
+            mainTimerStartPauseButton.classList.remove('bg-orange-500', 'hover:bg-orange-600', 'focus:ring-orange-400');
+            mainTimerStartPauseButton.classList.add('bg-emerald-500', 'hover:bg-emerald-600', 'focus:ring-emerald-400');
+            // Re-enable contenteditable
+            mainHoursDisplay.contentEditable = true;
+            mainMinutesDisplay.contentEditable = true;
+            mainSecondsDisplay.contentEditable = true;
+            timerTitleInput.readOnly = false; // Make title editable again
+        });
+
+
+        // Main timer countdown logic
+        function startTimerCountdown() {
+            if (!mainTimerIsRunning) {
+                // If the function is called but timer is not set to running, do nothing.
+                // This prevents multiple intervals from starting.
+                return;
+            }
+            clearInterval(timerInterval); // Clear any existing interval to prevent duplicates
+            timerInterval = setInterval(() => {
+                if (mainTimerIsRunning && mainTimerRemainingSeconds > 0) {
+                    mainTimerRemainingSeconds--;
+                    updateMainTimerDisplay();
+                } else if (mainTimerIsRunning && mainTimerRemainingSeconds === 0) {
+                    // Timer finished
+                    mainTimerIsRunning = false; // Stop the timer logic
+                    clearInterval(timerInterval); // Clear the interval when timer finishes
+                    sessionEndTime = new Date(); // Record end time
+
+                    mainTimerStartPauseButton.textContent = 'Start'; // Change button text back to 'Start'
+                    mainTimerStartPauseButton.classList.remove('bg-orange-500', 'hover:bg-orange-600', 'focus:ring-orange-400');
+                    mainTimerStartPauseButton.classList.add('bg-emerald-500', 'hover:bg-emerald-600', 'focus:ring-emerald-400');
+                    alarmAudio.play(); // Play alarm sound
+                    updateMainTimerDisplay(); // Ensure display shows 00:00:00
+
+                    // Record and save session using initial duration, and start/end times
+                    saveSession(mainTimerInitialSeconds, sessionStartTime, sessionEndTime, timerTitleInput.value);
+
+                    // Re-enable contenteditable and title input after timer finishes
+                    mainHoursDisplay.contentEditable = true;
+                    mainMinutesDisplay.contentEditable = true;
+                    mainSecondsDisplay.contentEditable = true;
+                    timerTitleInput.readOnly = false;
+                    timerTitleInput.value = ''; // Clear the title after session completion
+                    showToast('Timer completed!', 'success');
+                }
+            }, 1000); // Update every 1 second
+        }
+
+        // Function to update current time and date in the top bar
+        function updateDateTime() {
+            const now = new Date();
+            currentTimeDisplay.textContent = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+            currentDateDisplay.textContent = now.toLocaleDateString('en-IN', { day: '2-digit', month: '2-digit', year: 'numeric' });
+        }
+
+        // Dark Mode Toggle Logic
+        themeToggleBtn.addEventListener('click', () => {
+            darkIcon.classList.toggle('hidden');
+            lightIcon.classList.toggle('hidden');
+
+            if (localStorage.getItem('color-theme')) {
+                if (localStorage.getItem('color-theme') === 'light') {
+                    document.documentElement.classList.add('dark');
+                    localStorage.setItem('color-theme', 'dark');
+                } else {
+                    document.documentElement.classList.remove('dark');
+                    localStorage.setItem('color-theme', 'light');
+                }
+            } else {
+                // If no theme is set, check system preference
+                if (document.documentElement.classList.contains('dark')) {
+                    document.documentElement.classList.remove('dark');
+                    localStorage.setItem('color-theme', 'light');
+                } else {
+                    document.documentElement.classList.add('dark');
+                    localStorage.setItem('color-theme', 'dark');
+                }
+            }
+        });
+
+        // Initialize Dark Mode on page load
+        function initializeDarkMode() {
+            if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                lightIcon.classList.remove('hidden');
+                darkIcon.classList.add('hidden'); // Ensure dark icon is hidden
+                document.documentElement.classList.add('dark');
+            } else {
+                darkIcon.classList.remove('hidden');
+                lightIcon.classList.add('hidden'); // Ensure light icon is hidden
+                document.documentElement.classList.remove('dark');
+            }
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', async () => {
+            // --- Authentication Check ---
+            const token = localStorage.getItem('token');
+            const username = localStorage.getItem('username');
+
+            if (!token) {
+                window.location.href = 'login.html'; // Redirect to login if no token
+                return; // Stop execution
+            }
+            if (username && usernameDisplay) {
+                usernameDisplay.textContent = username; // Display username in the greeting
+            }
+
+            initializeDarkMode(); // Set initial dark mode state
+
+            // Initial read of default 00:00:00 to set initial seconds
+            mainTimerRemainingSeconds = readMainTimerInput();
+            mainTimerInitialSeconds = mainTimerRemainingSeconds; // Set initial state for reset
+
+            updateMainTimerDisplay(); // Ensure display reflects initial state (00:00:00)
+            // No need to call startTimerCountdown here, it will be called when user clicks start
+            updateDateTime(); // Set initial time and date
+            setInterval(updateDateTime, 1000); // Update time every second
+
+            // Load session history from backend on page load
+            await loadSessions();
+        });
+
+        // --- Logout Button Handler ---
+        logoutBtn.addEventListener('click', (event) => {
+            event.preventDefault(); // Prevent default button behavior
+            localStorage.removeItem('token'); // Clear the token
+            localStorage.removeItem('username'); // Clear username
+            showToast('You have been signed out.', 'error');
+            setTimeout(() => {
+                window.location.href = 'login.html'; // Redirect to login page
+            }, 1000);
+        });
+    </script>
+</body>
+</html>
